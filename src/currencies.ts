@@ -1,16 +1,13 @@
 import { Currency } from "./types/types";
 
-import * as XRPValidator from './validators/ripple_validator';
 import * as ETHValidator from './validators/ethereum_validator';
 import * as BTCValidator from './validators/bitcoin_validator';
 import * as ADAValidator from './validators/ada_validator';
-import * as NANOValidator from './validators/nano_validator';
 import * as SCValidator from './validators/siacoin_validator';
 import * as TRXValidator from './validators/tron_validator';
 import * as NEMValidator from './validators/nem_validator';
 import * as LSKValidator from './validators/lisk_validator';
 import * as BCHValidator from './validators/bch_validator';
-import * as XLMValidator from './validators/stellar_validator';
 import * as EOSValidator from './validators/eos_validator';
 import * as XTZValidator from './validators/tezos_validator';
 import * as USDTValidator from './validators/usdt_validator';
@@ -202,14 +199,6 @@ const CURRENCIES: Currency[] = [{
         addressTypes: { prod: ['00', '05'], testnet: ['6f', 'c4'] },
         validator: USDTValidator.isValidAddress,
     }, {
-        name: 'Ripple',
-        symbol: 'xrp',
-        validator: XRPValidator.isValidAddress,
-    }, {
-        name: 'Baby Ripple',
-        symbol: 'babyxrp',
-        validator: XRPValidator.isValidAddress,
-    }, {
         name: 'Binance Coin Mainnet',
         symbol: 'bnb',
         validator: ETHValidator.isValidAddress,
@@ -385,14 +374,6 @@ const CURRENCIES: Currency[] = [{
         symbol: 'storm',
         validator: ETHValidator.isValidAddress,
     }, {
-        name: 'Nano',
-        symbol: 'nano',
-        validator: NANOValidator.isValidAddress,
-    }, {
-        name: 'RaiBlocks',
-        symbol: 'xrb',
-        validator: NANOValidator.isValidAddress,
-    }, {
         name: 'Siacoin',
         symbol: 'sc',
         validator: SCValidator.isValidAddress,
@@ -418,10 +399,6 @@ const CURRENCIES: Currency[] = [{
         name: 'Lisk',
         symbol: 'lsk',
         validator: LSKValidator.isValidAddress,
-    }, {
-        name: 'Stellar',
-        symbol: 'xlm',
-        validator: XLMValidator.isValidAddress,
     }, {
         name: 'BTU Protocol',
         symbol: 'btu',
@@ -991,3 +968,4 @@ export function getAll() {
 //     .forEach(c => console.log(`"${c.name}","${c.symbol}",`));
 //
 
+export default { getByNameOrSymbol, getAll };

@@ -86,7 +86,8 @@ export function toHex(arrayOfBytes: any) {
 }
 
 export function sha256(payload: any, format = 'HEX') {
-    const sha = new jsSHA('SHA-256', format);
+    const shaLib = jsSHA?.default ?? jsSHA;
+    const sha = new shaLib('SHA-256', format);
     sha.update(payload);
     return sha.getHash(format);
 }

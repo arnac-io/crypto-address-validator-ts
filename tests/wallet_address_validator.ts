@@ -17,6 +17,8 @@ describe('validate', function () {
         it('should return true for correct bitcoin addresses', function () {
             valid('12KYrjTdVGjFMtaxERSk3gphreJ5US8aUP', 'bitcoin', null);
             valid('12QeMLzSrB8XH8FvEzPMVoRxVAzTr5XM2y', 'bitcoin', null);
+            valid('moVAmev75EDWbnARUYXrE5YxSoN3hUbpdY', 'bitcoin', { networkType: 'both' });
+            valid('1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', 'bitcoin', { networkType: 'both' });
             valid('12QeMLzSrB8XH8FvEzPMVoRxVAzTr5XM2y', 'BTC', null);
             valid('12QeMLzSrB8XH8FvEzPMVoRxVAzTr5XM2y', 'Bitcoin', null);
             valid('12QeMLzSrB8XH8FvEzPMVoRxVAzTr5XM2y', 'btc', null);
@@ -286,14 +288,6 @@ describe('validate', function () {
             valid('0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb', 'CLO', null);
         });
 
-        it('should return true for correct Ripple addresses', function () {
-            valid('rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCn', 'ripple', null);
-            valid('rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCn', 'XRP', null);
-            valid('r3kmLJN5D28dHuH8vZNUZpMC43pEHpaocV', 'XRP', null);
-            valid('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'XRP', null);
-            valid('rDTXLQ7ZKZVKz33zJbHjgVShjsBnqMBhmN', 'XRP', null);
-        });
-
         it('should return true for correct Binance Coin Mainnet addresses', function () {
             valid('0xE37c0D48d68da5c5b14E5c1a9f1CFE802776D9FF', 'binance coin mainnet', null);
             valid('0xa00354276d2fC74ee91e37D085d35748613f4748', 'binance coin mainnet', null);
@@ -301,14 +295,6 @@ describe('validate', function () {
             valid('0xc6d9d2cd449a754c494264e1809c50e34d64562b', 'bnb', null);
             valid('0x52908400098527886E0F7030069857D2E4169EE7', 'BNB', null);
             valid('0x8617E340B3D01FA5F11F306F4090FD50E238070D', 'bnb', null);
-        });
-
-        it('should return true for correct Baby Ripple addresses', function () {
-            valid('rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCn', 'babyxrp', null);
-            valid('rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCn', 'babyxrp', null);
-            valid('r3kmLJN5D28dHuH8vZNUZpMC43pEHpaocV', 'babyxrp', null);
-            valid('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'babyxrp', null);
-            valid('rDTXLQ7ZKZVKz33zJbHjgVShjsBnqMBhmN', 'babyxrp', null);
         });
 
         it('should return true for correct dash addresses', function () {
@@ -471,19 +457,6 @@ describe('validate', function () {
             valid('3My3KZgFQ3CrVHgz6vGRt8687sH4oAA1qp8', 'waves', { networkType: 'testnet' });
         });
 
-        it('should return true for correct nano addresses', function () {
-            valid('xrb_3t6k35gi95xu6tergt6p69ck76ogmitsa8mnijtpxm9fkcm736xtoncuohr3', 'nano', null);
-            valid('xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo', 'nano', null);
-            valid('xrb_35jjmmmh81kydepzeuf9oec8hzkay7msr6yxagzxpcht7thwa5bus5tomgz9', 'nano', null);
-            valid('xrb_1111111111111111111111111111111111111111111111111111hifc8npp', 'nano', null);
-            valid('xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est', 'nano', null);
-            valid('xrb_3wm37qz19zhei7nzscjcopbrbnnachs4p1gnwo5oroi3qonw6inwgoeuufdp', 'nano', null);
-            valid('xrb_3arg3asgtigae3xckabaaewkx3bzsh7nwz7jkmjos79ihyaxwphhm6qgjps4', 'nano', null);
-            valid('xrb_1f5e4w33ndqbkx4bw5jtp13kp5xghebfxcmw9hdt1f7goid1s4373w6tjmgu', 'nano', null);
-            valid('xrb_1q79ahdr36uqn38p5tp5sqwkn73rnpj1k8obtuetdbjcx37d5gahhd1u9cuh', 'nano', null);
-            valid('nano_1q79ahdr36uqn38p5tp5sqwkn73rnpj1k8obtuetdbjcx37d5gahhd1u9cuh', 'nano', null);
-        });
-
         it('should return true for correct siacoin addresses', function () {
             valid(
                 'a9b01c85163638682b170d82de02b8bb99ba86092e9ab1b0d25111284fe618e93456915820f1',
@@ -543,19 +516,6 @@ describe('validate', function () {
             valid('qqg82u7tq2eahs3gkh9m6kjnmjehr69m5v37alepq4', 'bsv', null);
             valid('bitcoincash:qrwkk9a3es2wu7mdvzh0vekfvjuzysq8tv7r3hcwr5', 'bsv', null);
             valid('1DrNXqCj2B8FKyx66RAWDkiEJhw2yrvhT3', 'bsv', null);
-        });
-
-        it('should return true for correct stellar addresses', function () {
-            valid('GBBM6BKZPEHWYO3E3YKREDPQXMS4VK35YLNU7NFBRI26RAN7GI5POFBB', 'stellar', null);
-            valid('GB7KKHHVYLDIZEKYJPAJUOTBE5E3NJAXPSDZK7O6O44WR3EBRO5HRPVT', 'stellar', null);
-            valid('GD6WVYRVID442Y4JVWFWKWCZKB45UGHJAABBJRS22TUSTWGJYXIUR7N2', 'stellar', null);
-            valid('GBCG42WTVWPO4Q6OZCYI3D6ZSTFSJIXIS6INCIUF23L6VN3ADE4337AP', 'stellar', null);
-            valid('GDFX463YPLCO2EY7NGFMI7SXWWDQAMASGYZXCG2LATOF3PP5NQIUKBPT', 'stellar', null);
-            valid('GBXEODUMM3SJ3QSX2VYUWFU3NRP7BQRC2ERWS7E2LZXDJXL2N66ZQ5PT', 'stellar', null);
-            valid('GAJHORKJKDDEPYCD6URDFODV7CVLJ5AAOJKR6PG2VQOLWFQOF3X7XLOG', 'stellar', null);
-            valid('GACXQEAXYBEZLBMQ2XETOBRO4P66FZAJENDHOQRYPUIXZIIXLKMZEXBJ', 'stellar', null);
-            valid('GDD3XRXU3G4DXHVRUDH7LJM4CD4PDZTVP4QHOO4Q6DELKXUATR657OZV', 'stellar', null);
-            valid('GDTYVCTAUQVPKEDZIBWEJGKBQHB4UGGXI2SXXUEW7LXMD4B7MK37CWLJ', 'stellar', null);
         });
 
         it('should return true for correct xtz(tezos) address', function () {
@@ -640,19 +600,6 @@ describe('validate', function () {
             valid('3My3KZgFQ3CrVHgz6vGRt8687sH4oAA1qp8', 'waves', { networkType: 'testnet' });
         });
 
-        it('should return true for correct nano addresses', function () {
-            valid('xrb_3t6k35gi95xu6tergt6p69ck76ogmitsa8mnijtpxm9fkcm736xtoncuohr3', 'nano', null);
-            valid('xrb_13ezf4od79h1tgj9aiu4djzcmmguendtjfuhwfukhuucboua8cpoihmh8byo', 'nano', null);
-            valid('xrb_35jjmmmh81kydepzeuf9oec8hzkay7msr6yxagzxpcht7thwa5bus5tomgz9', 'nano', null);
-            valid('xrb_1111111111111111111111111111111111111111111111111111hifc8npp', 'nano', null);
-            valid('xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est', 'nano', null);
-            valid('xrb_3wm37qz19zhei7nzscjcopbrbnnachs4p1gnwo5oroi3qonw6inwgoeuufdp', 'nano', null);
-            valid('xrb_3arg3asgtigae3xckabaaewkx3bzsh7nwz7jkmjos79ihyaxwphhm6qgjps4', 'nano', null);
-            valid('xrb_1f5e4w33ndqbkx4bw5jtp13kp5xghebfxcmw9hdt1f7goid1s4373w6tjmgu', 'nano', null);
-            valid('xrb_1q79ahdr36uqn38p5tp5sqwkn73rnpj1k8obtuetdbjcx37d5gahhd1u9cuh', 'nano', null);
-            valid('nano_1q79ahdr36uqn38p5tp5sqwkn73rnpj1k8obtuetdbjcx37d5gahhd1u9cuh', 'nano', null);
-        });
-
         it('should return true for correct siacoin addresses', function () {
             valid(
                 'a9b01c85163638682b170d82de02b8bb99ba86092e9ab1b0d25111284fe618e93456915820f1',
@@ -691,20 +638,6 @@ describe('validate', function () {
             valid('555666666999992L', 'lsk', null);
             valid('6853061742992593192L', 'lsk', null);
             valid('530464791801L', 'lsk', null);
-        });
-
-        it('should return true for correct stellar addresses', function () {
-            valid('GBBM6BKZPEHWYO3E3YKREDPQXMS4VK35YLNU7NFBRI26RAN7GI5POFBB', 'stellar', null);
-            valid('GB7KKHHVYLDIZEKYJPAJUOTBE5E3NJAXPSDZK7O6O44WR3EBRO5HRPVT', 'stellar', null);
-            valid('GD6WVYRVID442Y4JVWFWKWCZKB45UGHJAABBJRS22TUSTWGJYXIUR7N2', 'stellar', null);
-            valid('GBCG42WTVWPO4Q6OZCYI3D6ZSTFSJIXIS6INCIUF23L6VN3ADE4337AP', 'stellar', null);
-            valid('GDFX463YPLCO2EY7NGFMI7SXWWDQAMASGYZXCG2LATOF3PP5NQIUKBPT', 'stellar', null);
-            valid('GBXEODUMM3SJ3QSX2VYUWFU3NRP7BQRC2ERWS7E2LZXDJXL2N66ZQ5PT', 'stellar', null);
-            valid('GAJHORKJKDDEPYCD6URDFODV7CVLJ5AAOJKR6PG2VQOLWFQOF3X7XLOG', 'stellar', null);
-            valid('GACXQEAXYBEZLBMQ2XETOBRO4P66FZAJENDHOQRYPUIXZIIXLKMZEXBJ', 'stellar', null);
-            valid('GDD3XRXU3G4DXHVRUDH7LJM4CD4PDZTVP4QHOO4Q6DELKXUATR657OZV', 'stellar', null);
-            valid('GDTYVCTAUQVPKEDZIBWEJGKBQHB4UGGXI2SXXUEW7LXMD4B7MK37CWLJ', 'xlm', null);
-            valid('GCCVYKDNQP7NGNTR42SYPMQUZIFTPJUJHXM6JIXQMDLXMCC3ZYOV6AG3', 'xlm', { networkType: 'testnet' });
         });
 
         it('should return true for correct solana addresses', function () {
@@ -864,13 +797,6 @@ describe('validate', function () {
             invalid('0x02fcd51aAbB814FfFe17908fbc888A8975D839A5', 'callisto', null);
         });
 
-        it('should return false for incorrect ripple addresses', function () {
-            invalid('rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCN', 'ripple', null);
-            invalid('rDTXLQ7ZKZVKz33zJbHjgVShjsBnqMBhMN', 'XRP', null);
-            invalid('6xAff4d6793F584a473348EbA058deb8ca', 'ripple', null);
-            invalid('DJ53hTyLBdZp2wMi5BsCS3rtEL1ioYUkva', 'ripple', null);
-        });
-
         it('should return false for incorrect dash addresses', function () {
             commonTests('dash');
         });
@@ -969,14 +895,6 @@ describe('validate', function () {
             invalid('3My3KZgFQ3CrVHgz6vGRt8787sH4oAA1qp8', 'waves', { networkType: 'testnet' });
         });
 
-        it('should return false for incorrect nano addresses', function () {
-            commonTests('nano');
-            invalid('xrb_1f5e4w33ndqbkx4bw5jtp13kp5xghebfxcmw9hdt1f7goid1s4373w6tjdgu', 'nano', null);
-            invalid('nano_1f5e4w33ndqbkx4bw5jtp13kp5xghebfxcmw9hdt1f7goid1s4373w6tjdgu', 'nano', null);
-            invalid('xrb_1111111112111111111111111111111111111111111111111111hifc8npp', 'nano', null);
-            invalid('nano_111111111111111111111111111111111111111111111111111hifc8npp', 'nano', null);
-        });
-
         it('should return false for incorrect siacoin addresses', function () {
             commonTests('siacoin')
             invalid(
@@ -1025,20 +943,6 @@ describe('validate', function () {
             invalid('pzuefrpg3kl2ykqe52rxn96pd3kp4qudywr5py', 'bsv', null);
             invalid('rlt2c2wuxr644encp3as0hygtj9djrsaumku3cex5', 'bsv', null);
             invalid('qra607y4wnkmnpy3wcmrxmltzkrxywcq85c7watpdx09', 'bsv', null);
-        });
-
-        it('should return false for incorrect stellar addresses', function () {
-            commonTests('stellar');
-            invalid('SBGWKM3CD4IL47QN6X54N6Y33T3JDNVI6AIJ6CD5IM47HG3IG4O36XCU', 'stellar', null);
-            invalid('GBPXX0A5N4JYPESHAADMQKBPWZWQDQ64ZV6ZL2S3LAGW4SY7NTCMWIVL', 'stellar', null);
-            invalid('GCFZB6L25D26RQFDWSSBDEYQ32JHLRMTT44ZYE3DZQUTYOL7WY43PLBG++', 'stellar', null);
-            invalid('GADE5QJ2TY7S5ZB65Q43DFGWYWCPHIYDJ2326KZGAGBN7AE5UY6JVDRRA', 'stellar', null);
-            invalid('GB6OWYST45X57HCJY5XWOHDEBULB6XUROWPIKW77L5DSNANBEQGUPADT2', 'stellar', null);
-            invalid('GB6OWYST45X57HCJY5XWOHDEBULB6XUROWPIKW77L5DSNANBEQGUPADT2T', 'stellar', null);
-            invalid('GDXIIZTKTLVYCBHURXL2UPMTYXOVNI7BRAEFQCP6EZCY4JLKY4VKFNLT', 'stellar', null);
-            invalid('SAB5556L5AN5KSR5WF7UOEFDCIODEWEO7H2UR4S5R62DFTQOGLKOVZDY', 'stellar', null);
-            invalid('gWRYUerEKuz53tstxEuR3NCkiQDcV4wzFHmvLnZmj7PUqxW2wt', 'stellar', null);
-            invalid('g4VPBPrHZkfE8CsjuG2S4yBQNd455UWmk', 'stellar', null);
         });
 
         it('should return false for incorrect xtz(tezos) address', function () {
@@ -1206,20 +1110,6 @@ describe('invalid results', function () {
         invalid('0x02fcd51aAbB814FfFe17908fbc888A8975D839A5', 'callisto', null);
     });
 
-    it('should return false for incorrect ripple addresses', function () {
-        invalid('rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCN', 'ripple', null);
-        invalid('rDTXLQ7ZKZVKz33zJbHjgVShjsBnqMBhMN', 'XRP', null);
-        invalid('6xAff4d6793F584a473348EbA058deb8ca', 'ripple', null);
-        invalid('DJ53hTyLBdZp2wMi5BsCS3rtEL1ioYUkva', 'ripple', null);
-    });
-
-    it('should return false for incorrect baby ripple addresses', function () {
-        invalid('rG1QQv2nh2gr7RCZ1P8YYcBUKCCN633jCN', 'babyxrp', null);
-        invalid('rDTXLQ7ZKZVKz33zJbHjgVShjsBnqMBhMN', 'babyxrp', null);
-        invalid('6xAff4d6793F584a473348EbA058deb8ca', 'babyxrp', null);
-        invalid('DJ53hTyLBdZp2wMi5BsCS3rtEL1ioYUkva', 'babyxrp', null);
-    });
-
     it('should return false for incorrect dash addresses', function () {
         commonTests('dash');
     });
@@ -1313,14 +1203,6 @@ describe('invalid results', function () {
         invalid('3My3KZgFQ3CrVHgz6vGRt8787sH4oAA1qp8', 'waves', { networkType: 'testnet' });
     });
 
-    it('should return false for incorrect nano addresses', function () {
-        commonTests('nano');
-        invalid('xrb_1f5e4w33ndqbkx4bw5jtp13kp5xghebfxcmw9hdt1f7goid1s4373w6tjdgu', 'nano', null);
-        invalid('nano_1f5e4w33ndqbkx4bw5jtp13kp5xghebfxcmw9hdt1f7goid1s4373w6tjdgu', 'nano', null);
-        invalid('xrb_1111111112111111111111111111111111111111111111111111hifc8npp', 'nano', null);
-        invalid('nano_111111111111111111111111111111111111111111111111111hifc8npp', 'nano', null);
-    });
-
     it('should return false for incorrect siacoin addresses', function () {
         commonTests('siacoin')
         invalid(
@@ -1363,20 +1245,6 @@ describe('invalid results', function () {
         invalid('pzuefrpg3kl2ykqe52rxn96pd3kp4qudywr5py', 'bsv', null);
         invalid('rlt2c2wuxr644encp3as0hygtj9djrsaumku3cex5', 'bsv', null);
         invalid('qra607y4wnkmnpy3wcmrxmltzkrxywcq85c7watpdx09', 'bsv', null);
-    });
-
-    it('should return false for incorrect stellar addresses', function () {
-        commonTests('stellar');
-        invalid('SBGWKM3CD4IL47QN6X54N6Y33T3JDNVI6AIJ6CD5IM47HG3IG4O36XCU', 'stellar', null);
-        invalid('GBPXX0A5N4JYPESHAADMQKBPWZWQDQ64ZV6ZL2S3LAGW4SY7NTCMWIVL', 'stellar', null);
-        invalid('GCFZB6L25D26RQFDWSSBDEYQ32JHLRMTT44ZYE3DZQUTYOL7WY43PLBG++', 'stellar', null);
-        invalid('GADE5QJ2TY7S5ZB65Q43DFGWYWCPHIYDJ2326KZGAGBN7AE5UY6JVDRRA', 'stellar', null);
-        invalid('GB6OWYST45X57HCJY5XWOHDEBULB6XUROWPIKW77L5DSNANBEQGUPADT2', 'stellar', null);
-        invalid('GB6OWYST45X57HCJY5XWOHDEBULB6XUROWPIKW77L5DSNANBEQGUPADT2T', 'stellar', null);
-        invalid('GDXIIZTKTLVYCBHURXL2UPMTYXOVNI7BRAEFQCP6EZCY4JLKY4VKFNLT', 'stellar', null);
-        invalid('SAB5556L5AN5KSR5WF7UOEFDCIODEWEO7H2UR4S5R62DFTQOGLKOVZDY', 'stellar', null);
-        invalid('gWRYUerEKuz53tstxEuR3NCkiQDcV4wzFHmvLnZmj7PUqxW2wt', 'stellar', null);
-        invalid('g4VPBPrHZkfE8CsjuG2S4yBQNd455UWmk', 'stellar', null);
     });
 
     it('should return false for incorrect vet addresses', function () {
