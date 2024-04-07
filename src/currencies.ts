@@ -562,7 +562,7 @@ const CURRENCIES: Currency[] = [{
         symbol: 'sol',
         validator: Base58Validator.isValidAddress,
         maxLength: 44,
-        minLength: 43
+        minLength: 32
     },
     {
         name: 'yearn.finance',
