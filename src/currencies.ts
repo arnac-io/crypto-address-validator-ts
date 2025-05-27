@@ -13,9 +13,9 @@ import * as XTZValidator from './validators/tezos_validator';
 import * as USDTValidator from './validators/usdt_validator';
 import * as DotValidator from './validators/dot_validator';
 import * as BIP173Validator from './validators/bip173_validator';
-import * as Base58Validator from './validators/base58_validator';
 import * as IOTAValidator from './validators/iota_validator';
 import * as XMRValidator from './validators/xmr_validator';
+import * as SOLValidator from './validators/sol_validator';
 
 // defines P2PKH and P2SH address types for standard (prod) and testnet networks
 const CURRENCIES: Currency[] = [{
@@ -560,9 +560,7 @@ const CURRENCIES: Currency[] = [{
     {
         name: 'Solana',
         symbol: 'sol',
-        validator: Base58Validator.isValidAddress,
-        maxLength: 44,
-        minLength: 32
+        validator: SOLValidator.isValidAddress,
     },
     {
         name: 'yearn.finance',
