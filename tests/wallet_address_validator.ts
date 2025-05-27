@@ -641,10 +641,12 @@ describe('validate', function () {
         });
 
         it('should return true for correct solana addresses', function () {
+            valid('11111111111111111111111111111111', 'sol', null);
+            valid('Ed25519SigVerify111111111111111111111111111', 'solana', null);
             valid('833XorXTTx5iya5B3Tr6iqEs9GbRuvVfwyLCP2vpdzhq', 'solana', null);
             valid('6ZRCB7AAqGre6c72PRz3MHLC73VMYvJ8bi9KHf1HFpNk', 'sol', null);
             valid('HgyXhqapicB8zoyyFQ23oUwwFrBACDyDc7bqUuvnEELM', 'sol', null);
-            valid('833XorXTTx5iya5B3Tr6iqEs9GbRuvVfwyLCP2vpdzhq', 'sol', { networkType: 'testnet' });
+            valid('833XorXTTx5iya5B3Tr6iqEs9GbRuvVfwyLCP2vpdzhq', 'sol', null);
 
             valid('69UwBV4LPg7hHUS5JXiXyfgVnESmDKe8KJppsLj8pRU', 'sol', null);
             valid('G4qGCGF4vWGPzYi2pxc2Djvgv3j8NiWaHQMgTVebCX6W', 'sol', null);
@@ -966,9 +968,11 @@ describe('validate', function () {
 
         it('should return false for incorrect solana addresses', function () {
             invalid('833XQoXTx05iya53Tr6iqEs9GbRuvVfwyLCP2vpdzhq', 'solana', null);
+            invalid('833XorXTTx5iya5B3Tr6iqEs9GbRuvVfwyLCP2vpdz', 'solana', null);
+            invalid('1EM4e8eu2S2RQrbS8C6aYnunWpkAwQ8GtG', 'sol', null);
             invalid('bc1qwqdg6squsna38e46795at95yu9atm8azzmyvckulcc7kytlcckxswvvzej', 'sol', null);
             invalid('Ae2tdPwUPEZKmwoy3AU3cXb5Chnasj6mvVNxV1H11997q3VW5ihbSfQwGpm', 'sol', null);
-            invalid('addr1skemppmfevyk0lshu2w8j34707s3t3t58a04xcx5ccevrcmvpmxg2qt4pk0', 'sol', { networkType: 'testnet' });
+            invalid('addr1skemppmfevyk0lshu2w8j34707s3t3t58a04xcx5ccevrcmvpmxg2qt4pk0', 'sol', null);
         });
 
         it('should return false for incorrect monero addresses', function () {
