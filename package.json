@@ -398,7 +398,9 @@
         "1inch Network",
         "1inch",
         "IOTA",
-        "miota"
+        "miota",
+        "Pearl",
+        "pearl"
     ],
     "author": "Mark <mark.suurland@gmail.com>, Rony <rony@arnac.io>",
     "homepage": "https://github.com/marksuurland/crypto-address-validator-ts",
