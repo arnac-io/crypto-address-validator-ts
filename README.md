@@ -147,6 +147,7 @@ npm install crypto-address-validator-ts
 * Origin Protocol/ogn `'Origin Protocol'` or `'ogn'`
 * Orion Protocol/orn `'Orion Protocol'` or `'orn'`
 * Paxos/pax `'Paxos'` or `'pax'`
+* Pearl/pearl `'Pearl'` or `'pearl'`
 * PeerCoin/ppc `'PeerCoin'` or `'ppc'`
 * Perpetual Protocol/perp `'PeerCoin'` or `'perp'`
 * Phala Network/pha `'Phala Network'` or `'pha'`

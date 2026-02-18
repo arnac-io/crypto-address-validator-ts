@@ -16,6 +16,7 @@ import * as BIP173Validator from './validators/bip173_validator';
 import * as IOTAValidator from './validators/iota_validator';
 import * as XMRValidator from './validators/xmr_validator';
 import * as SOLValidator from './validators/sol_validator';
+import * as PearlValidator from './validators/pearl_validator';
 
 // defines P2PKH and P2SH address types for standard (prod) and testnet networks
 const CURRENCIES: Currency[] = [{
@@ -942,6 +943,12 @@ const CURRENCIES: Currency[] = [{
         symbol: 'miota',
         bech32Hrp: { prod: ['iota'], testnet: ['iota']},
         validator: IOTAValidator.isValidAddress,
+    },
+    {
+        name: 'Pearl',
+        symbol: 'pearl',
+        bech32Hrp: { prod: ['td'], testnet: ['td']},
+        validator: PearlValidator.isValidAddress,
     },
 ];
 
