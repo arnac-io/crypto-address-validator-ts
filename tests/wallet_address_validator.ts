@@ -682,6 +682,26 @@ describe('validate', function () {
             valid('9uXRFi4PZMqhsnthBF6bGdfVnBSZtfKkR7Td8qPM7jUKZeTfR1tLhCoTLqYNE12xuiQg3aWGiLw83bWsqwTRLaM4Jk47xYM', 'XMR', { networkType: 'testnet' });
             valid('9tFTaQM39JXhULZsHauPHhjFrjcGSGXoijEPYoRgAky9Veck2mFp3EifQ2tKHmEHuuUoFfgYRNR2bVaborz5oi8JA8xkqjY', 'monero', { networkType: 'testnet' })
         });
+
+        it('should return true for correct injective addresses', function () {
+             // Native bech32 addresses
+             valid('inj1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqe2hm49', 'inj', null);
+             valid('inj1dzqd00lfd4y4qy2pxa0dsdwzfnmsu27hgttswz', 'INJ', null);
+             valid('inj1cml96vmptgw99syqrrz8az79xer2pcgp0a885r', 'injective', null);
+             valid('inj1cml96vmptgw99syqrrz8az79xer2pcgp0a885r', 'Injective', null);
+
+             // networkType options (prod and testnet share the same HRP)
+             valid('inj1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqe2hm49', 'inj', { networkType: 'prod' });
+             valid('inj1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqe2hm49', 'inj', { networkType: 'testnet' });
+             valid('inj1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqe2hm49', 'inj', { networkType: 'both' });
+
+             // EVM addresses (INJ is EVM-compatible)
+             valid('0xE37c0D48d68da5c5b14E5c1a9f1CFE802776D9FF', 'inj', null);
+             valid('0xa00354276d2fC74ee91e37D085d35748613f4748', 'INJ', null);
+             valid('0xAff4d6793F584a473348EbA058deb8caad77a288', 'injective', null);
+             valid('0xaff4d6793f584a473348eba058deb8caad77a288', 'inj', null); // all lowercase
+        });
+
     });
 
     describe('invalid results', function () {
@@ -1279,7 +1299,20 @@ describe('invalid results', function () {
         invalid('CxDDSH8gS7jecsxaRL8Txf8H5kqesLXAEAEgp76Yz632J9M', 'dot', null);
     });
 
+    it('should return false for incorrect injective addresses', function () {
+        commonTests('inj');
 
+        // bech32 specific
+        invalid('inj1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqe2hm4', 'inj', null); // wrong checksum/length
+        invalid('cosmos1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqnrql8a', 'inj', null); // wrong prefix
+        invalid('inj2qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqcqt4fz', 'inj', null); // wrong prefix variant
+        invalid('inj1', 'inj', null); // prefix only, no data
+
+        // EVM specific
+        invalid('0xinvalid', 'inj', null);
+        invalid('0xE37c0D48d68da5c5b14E5c1a9f1CFE802776D9F', 'inj', null); // too short (39 hex chars)
+        invalid('0xE37c0D48d68da5c5b14E5c1a9f1CFE802776D9FFF', 'inj', null); // too long (41 hex chars)
+    });
 });
 
 
