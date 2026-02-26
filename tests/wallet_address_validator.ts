@@ -653,7 +653,7 @@ describe('validate', function () {
         });
 
         it('should return true for correct pearl addresses', function () {
-            valid('td1p779g720f75k5duy9wdfuzd56wlffjw33vcxkxvd9kr3njatmlysqvs4y3j', 'pearl', null);
+            valid('tprl1p779g720f75k5duy9wdfuzd56wlffjw33vcxkxvd9kr3njatmlysqw7yqp0', 'pearl', null);
         });
 
         it('should return false for incorrect pearl addresses', function () {
@@ -661,7 +661,7 @@ describe('validate', function () {
             invalid('%%@', 'pearl', null);
             invalid('bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4', 'pearl', null);
             invalid('1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', 'pearl', null);
-            invalid('td1p779g720f75k5duy9wdfuzd56wlffjw33vcxkxvd9kr3njatmlysqvs4y3k', 'pearl', null);
+            invalid('tprl1p779g720f75k5duy9wdfuzd56wlffjw33vcxkxvd9kr3njatmlysqw7yqp1', 'pearl', null);
         });
 
         it('should return true for correct iota addresses', function () {
