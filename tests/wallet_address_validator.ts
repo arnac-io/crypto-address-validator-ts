@@ -652,8 +652,12 @@ describe('validate', function () {
             valid('G4qGCGF4vWGPzYi2pxc2Djvgv3j8NiWaHQMgTVebCX6W', 'sol', null);
         });
 
-        it('should return true for correct pearl addresses', function () {
-            valid('tprl1p779g720f75k5duy9wdfuzd56wlffjw33vcxkxvd9kr3njatmlysqw7yqp0', 'pearl', null);
+        it('should return true for correct pearl mainnet addresses', function () {
+            valid('prl1pjhufmmgvs578th5546u68ldp0xxtp7earhjzrccrl06m2eegnt6qvzx7qe', 'pearl', { networkType: 'prod' });
+        });
+
+        it('should return true for correct pearl testnet addresses', function () {
+            valid('tprl1p779g720f75k5duy9wdfuzd56wlffjw33vcxkxvd9kr3njatmlysqw7yqp0', 'pearl', { networkType: 'testnet' });
         });
 
         it('should return false for incorrect pearl addresses', function () {
@@ -662,6 +666,11 @@ describe('validate', function () {
             invalid('bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4', 'pearl', null);
             invalid('1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', 'pearl', null);
             invalid('tprl1p779g720f75k5duy9wdfuzd56wlffjw33vcxkxvd9kr3njatmlysqw7yqp1', 'pearl', null);
+        });
+
+        it('should return false for pearl address with wrong networkType', function () {
+            invalid('tprl1p779g720f75k5duy9wdfuzd56wlffjw33vcxkxvd9kr3njatmlysqw7yqp0', 'pearl', { networkType: 'prod' });
+            invalid('prl1pjhufmmgvs578th5546u68ldp0xxtp7earhjzrccrl06m2eegnt6qvzx7qe', 'pearl', { networkType: 'testnet' });
         });
 
         it('should return true for correct iota addresses', function () {

@@ -947,7 +947,7 @@ const CURRENCIES: Currency[] = [{
     {
         name: 'Pearl',
         symbol: 'pearl',
-        bech32Hrp: { prod: ['tprl'], testnet: ['tprl']},
+        bech32Hrp: { prod: ['prl'], testnet: ['tprl']},
         validator: PearlValidator.isValidAddress,
     },
 ];
