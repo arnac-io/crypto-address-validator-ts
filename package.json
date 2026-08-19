@@ -435,6 +435,7 @@
         "test:dist": "npm run build && env TEST_TARGET=dist mocha -r ts-node/register 'tests/*.ts'",
         "lint:pkg": "publint && attw --pack .",
         "lint:dead": "knip",
+        "lint:docs": "npm run build && node scripts/check-readme-currencies.js",
         "test:pack": "npm run build && node scripts/smoke-pack.js",
         "prepare": "npm run build",
         "prepublishOnly": "npm run test && npm run lint:pkg && npm run test:pack"

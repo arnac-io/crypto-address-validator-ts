@@ -61,14 +61,16 @@ First release that Node can load. See DEV-26502.
 
 ### Added
 
+- Injective (`inj`) accepts native bech32 addresses (`inj1…`) in addition to the EVM `0x…`
+  form. Contributed in #3 and included in this release via the merge of `master`.
 - `Currency` and `Options` are exported from the package root.
 - `"type"`, `"exports"`, `"files"`, `"engines"` and `"publishConfig"` fields. `"files"` also stops the
   tarball shipping `tests/`, `tsconfig.json`, `.github/` and `.vscode/`.
 - Declaration maps, so editors resolve go-to-definition to the TypeScript sources.
 - CI on Node 20.19, 22, 24 and 26: build, both test passes, `publint`, `@arethetypeswrong/cli`, and a
   smoke test that installs the packed tarball and loads it via `require()`, `import()` and a named import.
-- Release automation: a merge to `master` that changes `version` publishes via npm trusted
-  publishing (OIDC, with provenance attestations), then tags the commit and opens a GitHub Release.
+- Release automation: once CI passes on `master`, any version not yet on the registry is published
+  via npm trusted publishing (OIDC, with provenance attestations), then tagged with a GitHub Release.
 - Solana vectors covering both encoded lengths of a 32-byte key, and invalid keys whose character count
   looks plausible but whose decoded length does not.
 - This changelog.

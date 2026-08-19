@@ -50,5 +50,8 @@ jobs:
       - name: Check for dead code
         run: npm run lint:dead
 
+      - name: Check the README currency list against the code
+        run: npm run lint:docs
+
       - name: Smoke-test the packed tarball
         run: npm run test:pack

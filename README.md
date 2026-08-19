@@ -161,7 +161,7 @@ currency; use `findCurrency()` to test support without throwing.
 * iExec RLC/rlc `'iExec RLC'` or `'rlc'`
 * Immutable X/imx `'Immutable X'` or `'imx'`
 * Illuvium/ilv `'Illuvium'` or `'ilv'`
-* Injective Protocol/inj `'Injective Protocol'` or `'inj'`
+* Injective/inj `'Injective'` or `'inj'`
 * IOTA/miota `'IOTA'` or `'miota'`
 * Komodo/kmd `'Komodo'` or `'kmd'`
 * KeeperDAO/rook `'KeeperDAO'` or `'rook'`
@@ -362,6 +362,7 @@ npm run build        # tsc -> dist/
 npm test             # runs the suite twice: against src, then against the built dist
 npm run lint:pkg     # publint + @arethetypeswrong/cli against a packed tarball
 npm run lint:dead    # knip (see knip.jsonc)
+npm run lint:docs    # the currency list below must match src/currencies.ts
 npm run test:pack    # installs the packed tarball into a temp project and loads it
 ```
 
@@ -372,16 +373,36 @@ The scripts assume a POSIX shell (`test:dist` uses `env`, and the smoke test she
 
 ## Releasing
 
-Bump `version` in `package.json` and update `CHANGELOG.md` in the same pull request. When it merges to
-`master`, CI compares the version against the npm registry and — if it is new — runs the full gate,
-publishes, tags the commit `v<version>` and opens a GitHub Release. Merges that do not change the
-version publish nothing.
+Bump `version` in `package.json` and update `CHANGELOG.md` in the same pull request. After it merges,
+CI runs on `master`; once CI passes, the release job compares `package.json`'s version against the npm
+registry and — if that version is not yet published — runs the full gate, publishes, tags the commit
+`v<version>` and opens a GitHub Release.
+
+The decision is registry state, not a version diff: a merge that changes nothing will still publish if
+an earlier attempt left the current version unpublished. Nothing is published once the version is on
+the registry.
 
 Publishing uses npm trusted publishing (OIDC), so no npm token is stored in this repository and
 provenance attestations are generated automatically. The release job runs only after CI has passed
 for the same commit.
 
-Two steps are not automated. After the first 0.6.0 publish, deprecate the names it replaces:
+### One-time setup
+
+Three settings are not in this repository and must be applied by someone with admin:
+
+1. A **Trusted Publisher** for `@fordefi/crypto-address-validator-ts` on npmjs.com — provider GitHub
+   Actions, this repo, workflow `release.yml`, allowed action `npm publish`. Until it exists the
+   publish step fails.
+2. **Required reviewers on the `release` environment.** `release.yml` declares
+   `environment: release`, but an environment with no protection rules is created implicitly on
+   first use and gates nothing — so until reviewers are configured, push access to `master` is
+   equivalent to publish access.
+3. **Branch protection on `master`** requiring the four `verify` checks, so a publish cannot be
+   triggered by a push that bypassed CI.
+
+### After the first publish
+
+Deprecate the names 0.6.0 replaces:
 
 ```
 npm deprecate "@fordefi-public/crypto-address-validator-ts@*" "moved to @fordefi/crypto-address-validator-ts"
