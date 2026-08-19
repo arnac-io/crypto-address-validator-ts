@@ -55,7 +55,7 @@ function getAddressType(address: string, currency: Currency): any {
     return null;
 }
 
-function isValidP2PKHandP2SHAddress(address: string, currency: Currency, opts: Options): boolean {
+function isValidP2PKHandP2SHAddress(address: string, currency: Currency, opts: Options | null): boolean {
     const networkType = opts ? opts.networkType : DEFAULT_NETWORK_TYPE;
 
     let correctAddressTypes: string[];
@@ -76,7 +76,7 @@ function isValidP2PKHandP2SHAddress(address: string, currency: Currency, opts: O
     return false;
 }
 
-export function isValidAddress(address: string, currency: Currency, opts: Options): boolean {
+export function isValidAddress(address: string, currency: Currency, opts: Options | null): boolean {
     return isValidP2PKHandP2SHAddress(address, currency, opts) || segwit.isValidAddress(address, currency, opts);
 }
 

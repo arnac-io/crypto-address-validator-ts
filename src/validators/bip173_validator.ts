@@ -4,7 +4,7 @@ const bech32 = require('../crypto/externals/bech32');
 const DEFAULT_NETWORK_TYPE = 'prod'
 
 // bip 173 bech 32 addresses (https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki)
-export function isValidAddress(address: string, currency: Currency, opts: Options): boolean {
+export function isValidAddress(address: string, currency: Currency, opts: Options | null): boolean {
     const networkType = opts ? opts.networkType : DEFAULT_NETWORK_TYPE;
     const decoded = bech32.decode(address, bech32.encodings.BECH32);
     if (!decoded) {
@@ -12,13 +12,14 @@ export function isValidAddress(address: string, currency: Currency, opts: Option
     }
 
     const bech32Hrp = decoded.hrp;
-    let correctBech32Hrps;
+    if (!currency.bech32Hrp) {
+        return false;
+    }
+    let correctBech32Hrps: string[];
     if (networkType === 'prod' || networkType === 'testnet') {
         correctBech32Hrps = currency.bech32Hrp[networkType];
-    } else if (currency.bech32Hrp) {
-        correctBech32Hrps = currency.bech32Hrp.prod.concat(currency.bech32Hrp.testnet)
     } else {
-        return false;
+        correctBech32Hrps = currency.bech32Hrp.prod.concat(currency.bech32Hrp.testnet)
     }
 
     if (correctBech32Hrps.indexOf(bech32Hrp) === -1) {

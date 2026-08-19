@@ -973,4 +973,3 @@ export function getAll() {
 //     .forEach(c => console.log(`"${c.name}","${c.symbol}",`));
 //
 
-export default { getByNameOrSymbol, getAll };

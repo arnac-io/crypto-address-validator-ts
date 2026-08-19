@@ -3,7 +3,7 @@ var bech32 = require('../crypto/externals/bech32');
 import { Currency, Options } from '../types/types';
 import * as BTCValidator from './bitcoin_validator';
 
-function validateAddress(address: string, currency: Currency, opts: Options) {
+function validateAddress(address: string, currency: Currency, opts: Options | null) {
     const networkType = opts ? opts.networkType : ''
     const regexp = currency.regexp;
     let prefix = 'bitcoincash';
@@ -19,7 +19,7 @@ function validateAddress(address: string, currency: Currency, opts: Options) {
         raw_address = res[1];
     }
 
-    if (!regexp.test(raw_address)) {
+    if (!regexp || !regexp.test(raw_address)) {
         return false;
     }
 
@@ -42,6 +42,6 @@ function validateAddress(address: string, currency: Currency, opts: Options) {
     return true;
 }
 
-export function isValidAddress(address: string, currency: Currency, opts: Options) {
+export function isValidAddress(address: string, currency: Currency, opts: Options | null) {
     return validateAddress(address, currency, opts) || BTCValidator.isValidAddress(address, currency, opts);
 }

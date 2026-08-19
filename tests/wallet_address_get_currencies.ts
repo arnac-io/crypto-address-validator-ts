@@ -1,6 +1,6 @@
 import { describe } from 'mocha';
 import { expect } from 'chai';
-import { getCurrencies, findCurrency, validate } from '../src/index';
+import { getCurrencies, findCurrency, validate } from './subject';
 
 describe('getCurrencies()', function () {
     it('Should get all currencies', function () {
@@ -18,7 +18,7 @@ describe('getCurrencies()', function () {
         const wrongCurrency = '%%%1312312';
         try {
             validate('123', wrongCurrency, null);
-        } catch(e) {
+        } catch(e: any) {
             expect(e.message).to.equal('Missing validator for currency: ' + wrongCurrency);
         }
     })

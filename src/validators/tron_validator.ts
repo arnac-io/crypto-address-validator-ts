@@ -35,15 +35,13 @@ function decodeBase58Address(base58Sting: string) {
     return false;
 }
 
-function getEnv(currency: Currency, networkType: string) {
-    let evn = networkType || 'prod';
+function getEnv(currency: Currency, networkType: string | undefined) {
+    const evn: 'prod' | 'testnet' = networkType === 'testnet' ? 'testnet' : 'prod';
 
-    if (evn !== 'prod' && evn !== 'testnet') evn = 'prod';
-
-    return currency.addressTypes[evn][0]
+    return currency.addressTypes ? currency.addressTypes[evn][0] : undefined;
 }
 
-export function isValidAddress(mainAddress: string, currency: Currency, opts: Options) {
+export function isValidAddress(mainAddress: string, currency: Currency, opts: Options | null) {
     const networkType = opts ? opts.networkType : '';
     const address = decodeBase58Address(mainAddress);
 

@@ -1,7 +1,7 @@
 export interface Currency {
     name: string;
     symbol: string;
-    validator: (address: string, currency: Currency, opts: Options) => boolean;
+    validator: (address: string, currency: Currency, opts: Options | null) => boolean;
     addressTypes?: AddressType;
     iAddressTypes?: AddressType;
     expectedLength?: number;
@@ -13,8 +13,8 @@ export interface Currency {
 }
 
 export interface Options {
-    chainType: string;
-    networkType: string;
+    chainType?: string;
+    networkType?: string;
 }
 
 interface AddressType {

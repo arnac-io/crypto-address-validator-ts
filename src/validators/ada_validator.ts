@@ -1,7 +1,7 @@
 var base58 = require('../crypto/externals/base58');
 import * as BIP173Validator from './bip173_validator';
 import * as CRC from 'crc';
-import * as cbor from 'cbor-js';
+const cbor = require('cbor-js');
 
 function getDecoded(address: string) {
     try {

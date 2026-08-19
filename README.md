@@ -1,27 +1,75 @@
-# crypto-address-validator-ts
-Simple wallet address validator for validating Bitcoin and other altcoins addresses in **Typescript** can be used in for example an Angular project.
+# @fordefi/crypto-address-validator-ts
 
-Forked from [christsim/multicoin-address-validator](https://github.com/christsim/multicoin-address-validator).
+Crypto address validator for Bitcoin and other altcoins, in **TypeScript**. This is Fordefi's fork,
+maintained for use in Fordefi products.
 
-Which is forked from [ryanralph/altcoin-address](https://github.com/ryanralph/altcoin-address).
+Published as **`@fordefi/crypto-address-validator-ts`**. Two related names exist and are *not* this
+package:
+
+* `@fordefi-public/crypto-address-validator-ts` — the previous name of this fork, deprecated as of
+  0.6.0.
+* `crypto-address-validator-ts` (unscoped) — the upstream project this was forked from. It is a
+  different, older package.
+
+### Fork lineage
+
+[defunctzombie/bitcoin-address](https://github.com/defunctzombie/bitcoin-address) (Roman Shtylman)
+→ [ryanralph/altcoin-address](https://github.com/ryanralph/altcoin-address)
+→ [christsim/multicoin-address-validator](https://github.com/christsim/multicoin-address-validator)
+→ [marksuurland/crypto-address-validator-ts](https://github.com/marksuurland/crypto-address-validator-ts)
+→ [arnac-io/crypto-address-validator-ts](https://github.com/arnac-io/crypto-address-validator-ts)
+
+MIT licensed throughout; the copyright notice originates with Roman Shtylman. See
+[Differences from upstream](#differences-from-upstream) for what this fork changed, and
+[CHANGELOG.md](CHANGELOG.md) for the release history.
 
 ## Installation
 
-### NPM
 ```
-npm install crypto-address-validator-ts
+npm install @fordefi/crypto-address-validator-ts
 ```
+
+Requires **Node.js >= 20.19**. The package ships CommonJS and works in Node and in bundlers
+(webpack, Vite, esbuild, Rollup).
 
 ## API
 
-##### validate (address [, currency = 'bitcoin'[, networkType = 'prod']])
+Named imports are the API — there is no default export.
 
-###### Parameters
-* address - Wallet address to validate.
-* currency - Currency name or symbol, e.g. `'bitcoin'` (default), `'litecoin'` or `'LTC'`
-* options - Use `{ networkType: 'prod' }` (default) to enforce standard address, `{ networkType: 'testnet' }` to enforce testnet address and `'{ networkType: 'both' }'` to enforce nothing.
+```typescript
+import { validate, getCurrencies, findCurrency } from '@fordefi/crypto-address-validator-ts';
+import type { Currency, Options } from '@fordefi/crypto-address-validator-ts';
+```
 
-> Returns true if the address (string) is a valid wallet address for the crypto currency specified, see below for supported currencies.
+##### `validate(address, currencyNameOrSymbol, opts?)`
+
+* `address` — wallet address to validate.
+* `currencyNameOrSymbol` — currency name or symbol, e.g. `'bitcoin'`, `'litecoin'` or `'LTC'`
+  (case-insensitive). See [supported currencies](#supported-crypto-currencies).
+* `opts` — optional; `Options | null`. Omit it (or pass `null`) for default behaviour.
+
+> Returns `true` if the address is a valid wallet address for that currency. **Throws**
+> `Missing validator for currency: <symbol>` if the currency is unknown.
+
+```typescript
+interface Options {
+    networkType?: string;   // 'prod' (default) | 'testnet' | 'both'
+    chainType?: string;     // only read for USDT: 'erc20' | 'omni'
+}
+```
+
+Both fields are optional, and `opts` itself may be `null` — an omitted `networkType` behaves as
+`'prod'`. `networkType: 'both'` enforces neither network. `chainType` is only read by the USDT
+validator; every other currency ignores it.
+
+##### `getCurrencies()`
+
+> Returns `Currency[]` — every supported currency.
+
+##### `findCurrency(symbol)`
+
+> Returns the matching `Currency`, or `null` if the symbol is not supported. Unlike `validate()`,
+> this does not throw.
 
 ### Supported crypto currencies
 
@@ -37,7 +85,6 @@ npm install crypto-address-validator-ts
 * AugurV2/repv2 `'AugurV2'` or `'repv2'`
 * AuroraCoin/aur `'AuroraCoin'` or `'aur'`
 * Axie Infinity/axs `'Axie Infinity'` or `'axs'`
-* Baby Ripple/babyxrp `'Baby Ripple'` or `'babyxrp'`
 * Badger DAO/badger `'Badger DAO'` or `'badger'`
 * Balancer/bal `'Balancer'` or `'bal'`
 * Bancor/bnt `'Bancor'` or `'bnt'`
@@ -90,7 +137,7 @@ npm install crypto-address-validator-ts
 * EtherZero/etz `'EtherZero'` or `'etz'`
 * Expanse/exp `'Expanse'` or `'exp'`
 * e-Radix/exrd `'e-Radix'` or `'exrd'`
-* Fantom/ftt `'Fantom'` or `'ftm'`
+* Fantom/ftm `'Fantom'` or `'ftm'`
 * FirmaChain/fct `'FirmaChain'` or `'fct'`
 * FreiCoin/frc `'FreiCoin'` or `'frc'`
 * FTX Token/ftt `'FTX Token'` or `'ftt'`
@@ -98,7 +145,7 @@ npm install crypto-address-validator-ts
 * GameCredits/game `'GameCredits'` or `'game'`
 * GarliCoin/grlc `'GarliCoin'` or `'grlc'`
 * Gnosis/gno `'Gnosis'` or `'gno'`
-* Golem/glm `'Gods Unchained'` or `'gods'`
+* Gods Unchained/gods `'Gods Unchained'` or `'gods'`
 * Golem/glm `'Golem'` or `'glm'`
 * Golem (GNT)/gnt `'Golem (GNT)'` or `'gnt'`
 * HedgeTrade/hedg `'HedgeTrade'` or `'hedg'`
@@ -134,7 +181,6 @@ npm install crypto-address-validator-ts
 * Multi-collateral DAI/dai `'Multi-collateral DAI'` or `'dai'`
 * MyNeighborAlice/alice `'MyNeighborAlice'` or `'alice'` only erc-20 validation no bep-20
 * NameCoin/nmc `'NameCoin'` or `'nmc'`
-* Nano/nano `'Nano'` or `'nano'`
 * Nem/xem `'Nem'` or `'xem'`
 * Neo/neo `'Neo'` or `'neo'`
 * NeoGas/gas `'NeoGas'` or `'gas'`
@@ -161,13 +207,11 @@ npm install crypto-address-validator-ts
 * Quant/qnt `'Quant'` or `'qnt'`
 * Quantstamp/qsp `'Quantstamp'` or `'qsp'`
 * Quantum Resistant Ledger/qrl `'Quantum Resistant Ledger'` or `'qrl'`
-* RaiBlocks/xrb `'RaiBlocks'` or `'xrb'`
 * Raiden Network Token/rdn `'Raiden Network Token'` or `'rdn'`
 * Rarible/rari `'Rarible'` or `'rari'`
 * Reef/reef `'Reef'` or `'reef'`
 * Reserve Rights/rsr `'Reserve Rights'` or `'rsr'`
 * Ripio Credit Network/rcn `'Ripio Credit Network'` or `'rcn'`
-* Ripple/xrp `'Ripple'` or `'xrp'`
 * Salt/salt `'Salt'` or `'salt'`
 * Selfkey/key `'Selfkey'` or `'key'`
 * Serum/srm `'Serum'` or `'srm'`
@@ -178,10 +222,10 @@ npm install crypto-address-validator-ts
 * SKALE Network/skl `'SKALE Network'` or `'skl'`
 * SnowGem/sng `'SnowGem'` or `'sng'`
 * SolarCoin/slr `'SolarCoin'` or `'slr'`
+* Solana/sol `'Solana'` or `'sol'`
 * SOLVE/solve `'SOLVE'` or `'solve'`
 * Spendcoin/spnd `'Spendcoin'` or `'spnd'`
 * Status/snt `'Status'` or `'snt'`
-* Stellar/xlm `'Stellar'` or `'xlm'`
 * Storj/storj `'Storj'` or `'storj'`
 * Storm/storm `'Storm'` or `'storm'`
 * StormX/stmx `'StormX'` or `'stmx'`
@@ -216,7 +260,7 @@ npm install crypto-address-validator-ts
 * VoteCoin/vot `'VoteCoin'` or `'vot'`
 * Waves/waves `'Waves'` or `'waves'`
 * Wings/wings `'Wings'` or `'wings'`
-* Wrapped Nexus Mutual/wnxm`'Wrapped Nexus Mutual'` or `'wnxm'`
+* Wrapped Nexus Mutual/wnxm `'Wrapped Nexus Mutual'` or `'wnxm'`
 * ZCash/zec `'ZCash'` or `'zec'`
 * Yearn.finance/yfi `'yearn.finance'` or `'yfi'`
 * Yield Guild Games/ygg `'Yield Guild Games'` or `'ygg'`
@@ -224,13 +268,31 @@ npm install crypto-address-validator-ts
 * ZenCash/zen `'ZenCash'` or `'zen'`
 
 
-### Usage example
+## Usage
+
+```typescript
+// TypeScript / ESM
+import { validate } from '@fordefi/crypto-address-validator-ts';
+
+validate('1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', 'bitcoin', null);              // true
+validate('0x1111111111111111111111111111111111111111', 'eth', null);         // true
+validate('mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef', 'btc', { networkType: 'testnet' });
+```
+
+```javascript
+// CommonJS
+const { validate } = require('@fordefi/crypto-address-validator-ts');
+
+validate('1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', 'bitcoin', null);              // true
+```
+
+### Framework example
 
 #### Angular directive
 ```typescript
 import {Directive, Input} from '@angular/core';
 import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator} from '@angular/forms';
-import { validate } from 'crypto-address-validator-ts';
+import { validate } from '@fordefi/crypto-address-validator-ts';
 
 @Directive({
   selector: '[ccyCode]',
@@ -254,3 +316,59 @@ export class CryptoAddressValidationDirective implements Validator {
 <input id="address"
        [ccyCode]="currency">
 ```
+
+
+## Differences from upstream
+
+Relative to `crypto-address-validator-ts` 0.5.11, the point this fork diverged from. See
+[CHANGELOG.md](CHANGELOG.md) for per-release detail.
+
+### Added
+
+* **Solana** (`sol`) address validation.
+* **Pearl** (`pearl`) address validation — bech32, HRP `prl` on mainnet and `tprl` on testnet.
+* `Currency` and `Options` are exported from the package root.
+
+### Changed
+
+* Published under the `@fordefi/` scope.
+* The build emits **CommonJS**, so the package loads in Node as well as in bundlers. Releases
+  0.5.15–0.5.25 emitted ESM that Node could not resolve, and 0.5.12–0.5.14 emitted AMD.
+* `validate()`'s third parameter accepts `null`.
+* `Options.chainType` is optional — it is only consulted for USDT.
+* Solana is validated by base58-decoding the address and requiring 32 bytes, rather than by
+  constructing a `@solana/web3.js` `PublicKey`. Behaviour is unchanged; the dependency is gone.
+* Only the package root is importable. Deep imports such as
+  `@fordefi/crypto-address-validator-ts/dist/validators/...` are not part of the public API.
+* Requires Node.js >= 20.19.
+
+### Removed
+
+* **The default export.** Use named imports.
+* **Ripple (`xrp`), Baby Ripple (`babyxrp`), Stellar (`xlm`), Nano (`nano`) and RaiBlocks (`xrb`).**
+  Their validators were deleted in 0.5.20. `validate()` **throws**
+  `Missing validator for currency: <symbol>` for these — the one change that will silently break
+  code migrating from upstream. Use `findCurrency(symbol)` to test for support without throwing.
+
+## Development
+
+```
+npm ci
+npm run build        # tsc -> dist/
+npm test             # runs the suite twice: against src, then against the built dist
+npm run lint:pkg     # publint + @arethetypeswrong/cli against a packed tarball
+npm run lint:dead    # knip (see knip.json for the expected CommonJS false positives)
+npm run test:pack    # installs the packed tarball into a temp project and loads it
+```
+
+CI runs all of the above on Node 20.19, 22, 24 and 26.
+
+## Releasing
+
+Bump `version` in `package.json` and update `CHANGELOG.md` in the same pull request. When it merges to
+`master`, CI compares the version against the npm registry and — if it is new — runs the full gate,
+publishes, tags the commit `v<version>` and opens a GitHub Release. Merges that do not change the
+version publish nothing.
+
+Publishing uses npm trusted publishing (OIDC), so no npm token is stored in this repository and
+provenance attestations are generated automatically.

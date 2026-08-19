@@ -1,15 +1,19 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "target": "esnext", 
-    "outDir": "dist",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "declarationMap": true,
     "sourceMap": true,
+    "target": "esnext",
+    "outDir": "dist",
+    "rootDir": "src",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "isolatedModules": true,
+    "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true,
     "lib": ["esnext", "dom"],
-    "allowJs": true,
-    "rootDir": "src"
+    "allowJs": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "tests"]

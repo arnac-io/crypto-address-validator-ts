@@ -1,7 +1,9 @@
 import { getAll, getByNameOrSymbol } from './currencies';
 import { Options } from './types/types';
 
-export function validate(address: string, currencyNameOrSymbol: string, opts: Options | null) {
+export type { Currency, Options } from './types/types';
+
+export function validate(address: string, currencyNameOrSymbol: string, opts: Options | null = null) {
     var currency = getByNameOrSymbol(currencyNameOrSymbol);
 
     if (currency && currency.validator) {
@@ -19,4 +21,3 @@ export function findCurrency(symbol: string) {
     return getByNameOrSymbol(symbol) || null ;
 }
 
-export default { validate, getCurrencies, findCurrency };

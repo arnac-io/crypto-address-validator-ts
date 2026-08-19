@@ -1,14 +1,15 @@
 import { describe } from 'mocha';
 import { expect } from 'chai';
-import { validate } from '../src/index';
+import type { Options } from '../src/index';
+import { validate } from './subject';
 
-function valid(address, currency, networkType) {
-    var valid = validate(address, currency, networkType);
+function valid(address: string, currency: string, opts: Options | null) {
+    var valid = validate(address, currency, opts);
     expect({ address, currency, valid }).to.deep.equal({ address, currency, valid: true });
 }
 
-function invalid(address, currency, networkType) {
-    var valid = validate(address, currency, networkType);
+function invalid(address: string, currency: string, opts: Options | null) {
+    var valid = validate(address, currency, opts);
     expect({ address, currency, valid }).to.deep.equal({ address, currency, valid: false });
 }
 
@@ -102,7 +103,7 @@ describe('validate', function () {
             // segwit addresses
             valid('ltc1qg42tkwuuxefutzxezdkdel39gfstuap288mfea', 'litecoin', null);
             valid('ltc1qg42tkwuuxefutzxezdkdel39gfstuap288mfea', 'litecoin', { networkType: 'prod' });
-            valid('tltc1qu78xur5xnq6fjy83amy0qcjfau8m367defyhms', 'litecoin', { networkType: { networkType: 'testnet' } });
+            valid('tltc1qu78xur5xnq6fjy83amy0qcjfau8m367defyhms', 'litecoin', { networkType: 'testnet' });
         });
 
         it('should return true for correct peercoin addresses', function () {
@@ -650,6 +651,11 @@ describe('validate', function () {
 
             valid('69UwBV4LPg7hHUS5JXiXyfgVnESmDKe8KJppsLj8pRU', 'sol', null);
             valid('G4qGCGF4vWGPzYi2pxc2Djvgv3j8NiWaHQMgTVebCX6W', 'sol', null);
+
+            // 32-byte keys at both encoded lengths (DEV-26502: validated by decoded
+            // byte length, not character count)
+            valid('5AW6CJpkh8RqUL3H1HUd4CK1YY69t3SA4PwwLoGAnuW', 'sol', null);   // 43 chars
+            valid('JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG', 'sol', null);   // 44 chars
         });
 
         it('should return true for correct pearl mainnet addresses', function () {
@@ -694,14 +700,14 @@ describe('validate', function () {
     });
 
     describe('invalid results', function () {
-        function commonTests(currency) {
+        function commonTests(currency: string) {
             invalid('', currency, null); //reject blank
             invalid('%%@', currency, null); //reject invalid base58 string
             invalid('1A1zP1ePQGefi2DMPTifTL5SLmv7DivfNa', currency, null); //reject invalid address
             invalid('bd839e4f6fadb293ba580df5dea7814399989983', currency, null);  //reject transaction id's
             //testnet
-            invalid('', currency, 'testnet'); //reject blank
-            invalid('%%@', currency, 'testnet'); //reject invalid base58 string
+            invalid('', currency, { networkType: 'testnet' }); //reject blank
+            invalid('%%@', currency, { networkType: 'testnet' }); //reject invalid base58 string
             invalid('1A1zP1ePQGefi2DMPTifTL5SLmv7DivfNa', currency, { networkType: 'testnet' }); //reject invalid address
             invalid('bd839e4f6fadb293ba580df5dea7814399989983', currency, { networkType: 'testnet' });  //reject transaction id's
         }
@@ -988,6 +994,12 @@ describe('validate', function () {
         });
 
         it('should return false for incorrect solana addresses', function () {
+            // DEV-26502: wrong decoded byte length must fail even when the character
+            // count looks plausible — b31 below is 43 chars, same as a valid key.
+            invalid('4uQeVj5tqViQh7yWWGStvkEG1Zmhx6uasJtWCJziofL', 'sol', null);   // 31 bytes, 43 chars
+            invalid('2K3n5t4wSaF5mj27Tw9vStXWLWyRjjiH5Cp3CFLpKVCr1c', 'sol', null);   // 33 bytes
+            invalid('6ZRCB7AAqGre6c72PRz3MHLC73VMYvJ8bi9KHf1HFpN0', 'sol', null);   // '0' is not base58
+            invalid('6ZRCB7AAqGre6c72PRz3MHLC73VMYvJ8bi9KHf1HFpNkk', 'sol', null);  // one char too long
             invalid('833XQoXTx05iya53Tr6iqEs9GbRuvVfwyLCP2vpdzhq', 'solana', null);
             invalid('833XorXTTx5iya5B3Tr6iqEs9GbRuvVfwyLCP2vpdz', 'solana', null);
             invalid('1EM4e8eu2S2RQrbS8C6aYnunWpkAwQ8GtG', 'sol', null);
@@ -1011,7 +1023,7 @@ describe('validate', function () {
 });
 
 describe('invalid results', function () {
-    function commonTests(currency) {
+    function commonTests(currency: string) {
         invalid('', currency, null); //reject blank
         invalid('%%@', currency, null); //reject invalid base58 string
         invalid('1A1zP1ePQGefi2DMPTifTL5SLmv7DivfNa', currency, null); //reject invalid address
