@@ -17,6 +17,7 @@ import * as IOTAValidator from './validators/iota_validator';
 import * as XMRValidator from './validators/xmr_validator';
 import * as SOLValidator from './validators/sol_validator';
 import * as PearlValidator from './validators/pearl_validator';
+import * as INJValidator from './validators/inj_validator';
 
 // defines P2PKH and P2SH address types for standard (prod) and testnet networks
 const CURRENCIES: Currency[] = [{
@@ -729,9 +730,10 @@ const CURRENCIES: Currency[] = [{
         validator: ETHValidator.isValidAddress,
     },
     {
-        name: 'Injective Protocol',
+        name: 'Injective',
         symbol: 'inj',
-        validator: ETHValidator.isValidAddress,
+        bech32Hrp: { prod: ['inj'], testnet: ['inj'] },
+        validator: INJValidator.isValidAddress,
     },
     {
         name: 'Illuvium',
