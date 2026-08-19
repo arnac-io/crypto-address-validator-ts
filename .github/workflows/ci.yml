@@ -10,20 +10,25 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
-        # 20.19 is the declared engines floor (the version where require(esm) landed);
-        # 22 is what the arnac frontend runs and where Node's module-syntax detection
-        # surfaced DEV-26502; 24 is Active LTS; 26 is Current.
+        # 20.19 is the declared engines floor (the version where require(esm) landed); 22 is
+        # where Node's module-syntax detection surfaced DEV-26502 and is the floor most
+        # consumers run; 24 is Active LTS; 26 is Current.
         node-version: ['20.19', '22.x', '24.x', '26.x']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
@@ -41,6 +46,9 @@ jobs:
 
       - name: Validate package metadata and type resolution
         run: npm run lint:pkg
+
+      - name: Check for dead code
+        run: npm run lint:dead
 
       - name: Smoke-test the packed tarball
         run: npm run test:pack

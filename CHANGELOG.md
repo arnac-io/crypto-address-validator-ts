@@ -12,14 +12,13 @@ Releases moved between npm names over time:
 | Versions | Published as |
 |---|---|
 | 0.5.12 – 0.5.18 | `@fordefi/crypto-address-validator-ts` |
-| 0.5.18 – 0.5.25 | `@fordefi-public/crypto-address-validator-ts` |
+| 0.5.18 | republished under `@fordefi-public/crypto-address-validator-ts` on 2023-10-26 |
+| 0.5.20 – 0.5.25 | `@fordefi-public/crypto-address-validator-ts` |
 | 0.6.0 onward | `@fordefi/crypto-address-validator-ts` |
 
-## [Unreleased]
+## 0.6.0 — 2026-08-19
 
-## [0.6.0] — unreleased
-
-First release that Node can load. See [DEV-26502](https://fordefi.atlassian.net/browse/DEV-26502).
+First release that Node can load. See DEV-26502.
 
 ### Fixed
 
@@ -38,16 +37,23 @@ First release that Node can load. See [DEV-26502](https://fordefi.atlassian.net/
 - **Breaking:** published as `@fordefi/crypto-address-validator-ts` again.
   `@fordefi-public/crypto-address-validator-ts` is deprecated.
 - **Breaking:** only the package root is importable. Deep imports into `dist/` no longer resolve.
-- **Breaking:** requires Node.js **>= 20.19**.
+- **Breaking:** declares `engines.node >= 20.19`. This is a support policy rather than an artifact
+  requirement: the emitted CommonJS runs on Node 18, but 18 and 20 are both end-of-life and 20.19 is
+  the lowest version CI exercises.
 - Solana addresses are validated by base58-decoding and requiring 32 bytes, rather than by constructing
   a `@solana/web3.js` `PublicKey` — the same check that class performs. Verified against it across 4064
-  generated and edge-case inputs. Dropping the dependency removes roughly 163 KB raw / 53 KB gzip from
-  a bundle that does not otherwise use Solana, because the CommonJS build cannot tree-shake it.
+  generated and edge-case inputs.
+  On bundle size, measured on a minimal Vite consumer: moving to CommonJS on its own *added* ~121 KB raw
+  / ~29 KB gzip, because a CommonJS build cannot tree-shake `@solana/web3.js` the way the previous ESM
+  output did. Dropping the dependency then removed ~284 KB raw / ~81 KB gzip, for a net ~163 KB raw /
+  ~53 KB gzip smaller than 0.5.25. A consumer that imports `@solana/web3.js` itself sees no change.
 - Both `Options` fields are now optional. `chainType` is only read by the USDT validator, and every
   validator already defaulted a missing `networkType`.
 - `validate()`'s third parameter is now optional and typed `Options | null`, so the two-argument form used
   throughout the docs typechecks; previously TypeScript required all three arguments.
-- Upgraded to TypeScript 6 with `strict`, and updated every remaining dependency.
+- Upgraded to TypeScript 6 with `strict`. Dependencies updated except two deliberately held back:
+  `browserify-bignum` (still on the `1.3.0-2` prerelease, the only published line) and `cbor-js`
+  (0.1.0, last published 2015). Replacing both is tracked separately.
 - `buffer` moved from `devDependencies` to `dependencies`. It is required at package-import time and
   previously resolved only because `@solana/web3.js` happened to hoist it.
 - `test` now runs the suite twice: against `src`, then against the built `dist`. Previously it forced
@@ -77,38 +83,38 @@ First release that Node can load. See [DEV-26502](https://fordefi.atlassian.net/
   exported; they were only ever used inside their own modules.
 - `index.html`, which loaded a test bundle removed in 2021.
 
-## [0.5.25] — 2026-03-16
+## 0.5.25 — 2026-03-16
 
 ### Changed
 
 - Pearl mainnet bech32 HRP is now `prl`; testnet stays `tprl`. (`6b83ffa`, #5)
 
-## [0.5.24] — 2026-02-26
+## 0.5.24 — 2026-02-26
 
 ### Fixed
 
 - Pearl bech32 HRP corrected from `td` to `tprl`. (`73cf9f6`, #4)
 
-## [0.5.23] — 2026-02-18
+## 0.5.23 — 2026-02-18
 
 ### Added
 
 - Pearl (`pearl`) address validation via bech32/segwit, HRP `td`. (`4097fb2`, `38cc0d3`, #2)
 
-## [0.5.22] — 2025-05-27
+## 0.5.22 — 2025-05-27
 
 ### Changed
 
 - Solana addresses are validated with `@solana/web3.js`'s `PublicKey` instead of a generic base58
   length check, which accepted addresses of the wrong decoded length. (`bb98159`, #1)
 
-## [0.5.21] — 2024-04-07
+## 0.5.21 — 2024-04-07
 
 ### Fixed
 
 - Solana `minLength` lowered from 43 to 32. (`e127162`)
 
-## [0.5.20] — 2023-10-26
+## 0.5.20 — 2023-10-26
 
 Published under `@fordefi-public/`. This release retargeted the build for Vite and, in the same
 commit, removed five currencies.
@@ -134,4 +140,3 @@ First releases under the `@fordefi/` scope (`rony-arnac`). 0.5.12–0.5.14 emitt
 emitted ESM. None are loadable by Node. There is no corresponding commit in this repository for
 0.5.18 as published under `@fordefi-public/`.
 
-[Unreleased]: https://github.com/arnac-io/crypto-address-validator-ts/compare/master...HEAD

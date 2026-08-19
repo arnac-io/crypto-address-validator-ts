@@ -42,7 +42,7 @@ function getEnv(currency: Currency, networkType: string | undefined) {
 }
 
 export function isValidAddress(mainAddress: string, currency: Currency, opts: Options | null) {
-    const networkType = opts ? opts.networkType : '';
+    const networkType = opts?.networkType ?? '';
     const address = decodeBase58Address(mainAddress);
 
     if (!address) {

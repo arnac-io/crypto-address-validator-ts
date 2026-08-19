@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["tests/**/*.ts", "scripts/*.js"],
+  "entry": ["tests/*.ts", "tests/helpers/*.ts", "scripts/*.js"],
   "project": ["src/**/*.{ts,js}", "tests/**/*.ts", "scripts/*.js"],
 
   // src/crypto/externals/** is vendored third-party code that the validators reach through

@@ -56,18 +56,20 @@ function getAddressType(address: string, currency: Currency): any {
 }
 
 function isValidP2PKHandP2SHAddress(address: string, currency: Currency, opts: Options | null): boolean {
-    const networkType = opts ? opts.networkType : DEFAULT_NETWORK_TYPE;
+    const networkType = opts?.networkType ?? DEFAULT_NETWORK_TYPE;
+
+    if (!currency.addressTypes) {
+        return false;
+    }
 
     let correctAddressTypes: string[];
     const addressType = getAddressType(address, currency);
 
     if (addressType) {
         if (networkType === 'prod' || networkType === 'testnet') {
-            correctAddressTypes = currency.addressTypes![networkType];
-        } else if (currency.addressTypes) {
-            correctAddressTypes = currency.addressTypes.prod.concat(currency.addressTypes.testnet);
+            correctAddressTypes = currency.addressTypes[networkType];
         } else {
-            return false;
+            correctAddressTypes = currency.addressTypes.prod.concat(currency.addressTypes.testnet);
         }
 
         return correctAddressTypes.indexOf(addressType) >= 0;

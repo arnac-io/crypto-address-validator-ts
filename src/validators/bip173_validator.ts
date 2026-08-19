@@ -5,7 +5,7 @@ const DEFAULT_NETWORK_TYPE = 'prod'
 
 // bip 173 bech 32 addresses (https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki)
 export function isValidAddress(address: string, currency: Currency, opts: Options | null): boolean {
-    const networkType = opts ? opts.networkType : DEFAULT_NETWORK_TYPE;
+    const networkType = opts?.networkType ?? DEFAULT_NETWORK_TYPE;
     const decoded = bech32.decode(address, bech32.encodings.BECH32);
     if (!decoded) {
         return false;

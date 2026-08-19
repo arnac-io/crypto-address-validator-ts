@@ -3,7 +3,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "target": "esnext",
+    "target": "es2023",
     "outDir": "dist",
     "rootDir": "src",
     "module": "nodenext",
@@ -11,8 +11,7 @@
     "strict": true,
     "isolatedModules": true,
     "noUnusedLocals": true,
-    "allowSyntheticDefaultImports": true,
-    "lib": ["esnext", "dom"],
+    "lib": ["es2023"],
     "allowJs": true
   },
   "include": ["src"],

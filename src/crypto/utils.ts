@@ -1,3 +1,6 @@
+// jssha's CommonJS declaration ends `export = jsSHA`, so import-equals is the only form
+// that types correctly here. Rewriting it as `import * as` reintroduces the interop bug
+// the `jsSHA?.default ?? jsSHA` shim used to paper over.
 import jsSHA = require('jssha');
 import * as sha3 from 'js-sha3';
 var Blake256 = require('./externals/blake256');
@@ -84,14 +87,14 @@ export function toHex(arrayOfBytes: any) {
     return hex;
 }
 
-export function sha256(payload: any, format: 'HEX' = 'HEX'): string {
-    const sha = new jsSHA('SHA-256', format);
+export function sha256(payload: any): string {
+    const sha = new jsSHA('SHA-256', 'HEX');
     sha.update(payload);
-    return sha.getHash(format);
+    return sha.getHash('HEX');
 }
 
-export function sha256x2(buffer: any, format: 'HEX' = 'HEX') {
-    return sha256(sha256(buffer, format), format);
+export function sha256x2(buffer: any) {
+    return sha256(sha256(buffer));
 }
 
 export function sha256Checksum(payload: any) {
@@ -110,7 +113,7 @@ export function blake2b(hexString: any, outlen: any) {
     return new Blake2B(outlen).update(Buffer.from(hexString, 'hex')).digest('hex');
 }
 
-export function keccak256Checksum (payload: any) {
+export function keccak256Checksum (payload: string | Uint8Array) {
     return sha3.keccak256(payload).toString().substr(0, 8);
 }
 

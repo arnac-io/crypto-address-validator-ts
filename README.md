@@ -38,7 +38,7 @@ Named imports are the API — there is no default export.
 
 ```typescript
 import { validate, getCurrencies, findCurrency } from '@fordefi/crypto-address-validator-ts';
-import type { Currency, Options } from '@fordefi/crypto-address-validator-ts';
+import type { AddressType, Currency, Options } from '@fordefi/crypto-address-validator-ts';
 ```
 
 ##### `validate(address, currencyNameOrSymbol, opts?)`
@@ -53,14 +53,18 @@ import type { Currency, Options } from '@fordefi/crypto-address-validator-ts';
 
 ```typescript
 interface Options {
-    networkType?: string;   // 'prod' (default) | 'testnet' | 'both'
-    chainType?: string;     // only read for USDT: 'erc20' | 'omni'
+    networkType?: 'prod' | 'testnet' | 'both' | 'stagenet';
+    chainType?: string;
 }
 ```
 
-Both fields are optional, and `opts` itself may be `null` — an omitted `networkType` behaves as
-`'prod'`. `networkType: 'both'` enforces neither network. `chainType` is only read by the USDT
-validator; every other currency ignores it.
+Both fields are optional and `opts` itself may be omitted or `null`. An absent `networkType`
+behaves as `'prod'`; `'both'` enforces neither network; `'stagenet'` is Monero-only. `chainType`
+is only read by the USDT validator, to choose between its ERC-20 and Omni forms — every other
+currency ignores it, and it is typed `string` so callers can pass their own chain identifiers.
+
+`validate()` returns `false` for an empty or nullish `address`. It throws only for an unknown
+currency; use `findCurrency()` to test support without throwing.
 
 ##### `getCurrencies()`
 
@@ -141,7 +145,7 @@ validator; every other currency ignores it.
 * FirmaChain/fct `'FirmaChain'` or `'fct'`
 * FreiCoin/frc `'FreiCoin'` or `'frc'`
 * FTX Token/ftt `'FTX Token'` or `'ftt'`
-* FUNToken/fun `'FreiCoin'` or `'fun'`
+* FUNToken/fun `'FUNToken'` or `'fun'`
 * GameCredits/game `'GameCredits'` or `'game'`
 * GarliCoin/grlc `'GarliCoin'` or `'grlc'`
 * Gnosis/gno `'Gnosis'` or `'gno'`
@@ -195,7 +199,7 @@ validator; every other currency ignores it.
 * Paxos/pax `'Paxos'` or `'pax'`
 * Pearl/pearl `'Pearl'` or `'pearl'`
 * PeerCoin/ppc `'PeerCoin'` or `'ppc'`
-* Perpetual Protocol/perp `'PeerCoin'` or `'perp'`
+* Perpetual Protocol/perp `'Perpetual Protocol'` or `'perp'`
 * Phala Network/pha `'Phala Network'` or `'pha'`
 * PIVX/pivx `'PIVX'` or `'pivx'`
 * Polkadot/dot `'Polkadot'` or `'dot'`
@@ -357,11 +361,14 @@ npm ci
 npm run build        # tsc -> dist/
 npm test             # runs the suite twice: against src, then against the built dist
 npm run lint:pkg     # publint + @arethetypeswrong/cli against a packed tarball
-npm run lint:dead    # knip (see knip.json for the expected CommonJS false positives)
+npm run lint:dead    # knip (see knip.jsonc)
 npm run test:pack    # installs the packed tarball into a temp project and loads it
 ```
 
 CI runs all of the above on Node 20.19, 22, 24 and 26.
+
+The scripts assume a POSIX shell (`test:dist` uses `env`, and the smoke test shells out to
+`npm` and `tar`).
 
 ## Releasing
 
@@ -371,4 +378,15 @@ publishes, tags the commit `v<version>` and opens a GitHub Release. Merges that 
 version publish nothing.
 
 Publishing uses npm trusted publishing (OIDC), so no npm token is stored in this repository and
-provenance attestations are generated automatically.
+provenance attestations are generated automatically. The release job runs only after CI has passed
+for the same commit.
+
+Two steps are not automated. After the first 0.6.0 publish, deprecate the names it replaces:
+
+```
+npm deprecate "@fordefi-public/crypto-address-validator-ts@*" "moved to @fordefi/crypto-address-validator-ts"
+npm deprecate "@fordefi/crypto-address-validator-ts@<0.6.0" "not loadable by Node; upgrade to >=0.6.0"
+```
+
+The second matters because a caret range on a `0.x` version pins the minor: `^0.5.18` will never
+resolve to `0.6.0`, so existing dependents must change their range by hand to receive the fix.
