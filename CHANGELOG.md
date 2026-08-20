@@ -16,6 +16,31 @@ Releases moved between npm names over time:
 | 0.5.20 – 0.5.25 | `@fordefi-public/crypto-address-validator-ts` |
 | 0.6.0 onward | `@fordefi/crypto-address-validator-ts` |
 
+## 0.6.1 — 2026-08-20
+
+### Fixed
+
+- **`validate()` no longer throws `"jsSHA is not a constructor"` in a browser bundle.** jssha's `exports`
+  map splits `import` from `require`, and a bundler configured with conditions that omit `require` —
+  rolldown-vite with `['browser', 'import', 'module', 'default']`, which the arnac frontend sets — resolved
+  our `require('jssha')` to jssha's ESM build and handed back the namespace object instead of the
+  constructor. This broke **60 currencies**, every one whose validator reaches a SHA-256 checksum (btc, bch,
+  bsv, doge, ltc, dash, trx, usdt, neo, qtum and the rest), and took the consumer's React tree down with it.
+  Introduced in 0.6.0 by removing the `jsSHA?.default ?? jsSHA` shim, which was load-bearing for bundlers
+  rather than dead as the 0.6.0 notes claimed.
+- **`validate()` no longer throws a bare `'Overflow'` string for a malformed Monero address.** A 95-character
+  base58 string passes the alphabet check but can still overflow a cnBase58 block, and the vendored decoder
+  reports that by throwing. It now reads as an invalid address. Predates 0.6.0 — 0.5.25 does it too — and is
+  platform-independent, not browser-specific.
+
+### Added
+
+- `npm run test:browser` (`scripts/smoke-browser.js`), wired into CI and `prepublishOnly`: bundles the
+  package for a browser with the consumer's resolution conditions and runs every validator inside the
+  bundle, asserting that none throws and that verdicts match Node. Every pre-existing check — the suite,
+  `publint`, `attw`, the pack smoke test — loads the package under Node's CommonJS resolution, which is why
+  0.6.0's crash reached the registry unnoticed.
+
 ## 0.6.0 — 2026-08-19
 
 First release that Node can load. See DEV-26502.

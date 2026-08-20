@@ -52,7 +52,16 @@ export function isValidAddress(address: string, currency: Currency, opts: Option
       }
     }
 
-    var decodedAddrStr = cnBase58.decode(address)
+    // cnBase58 reports malformed input by throwing bare strings ('Overflow', 'Invalid block
+    // size'), and the alphabet check above does not imply decodability: a 95-character base58
+    // string can still overflow a block. A malformed address has to read as invalid rather than
+    // escape validate() as an exception no caller can anticipate.
+    var decodedAddrStr: string
+    try {
+      decodedAddrStr = cnBase58.decode(address)
+    } catch (e) {
+      return false
+    }
     if (!decodedAddrStr) return false
 
     if (!validateNetwork(decodedAddrStr, currency, networkType, addressType)) return false

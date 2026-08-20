@@ -1,8 +1,15 @@
 // jssha's CommonJS declaration ends `export = jsSHA`, so import-equals is the only form
-// that types correctly here. Rewriting it as `import * as` reintroduces the interop bug
-// the `jsSHA?.default ?? jsSHA` shim used to paper over.
-import jsSHA = require('jssha');
+// that types correctly here.
+import jsSHAModule = require('jssha');
 import * as sha3 from 'js-sha3';
+
+// jssha's `exports` map splits `import` (ESM) from `require` (CommonJS). Bundlers resolve
+// this `require` through whichever conditions they are configured for, and one that omits
+// `require` — rolldown-vite with `resolve.conditions: ['browser', 'import', 'module',
+// 'default']`, as the arnac frontend sets — hands back the ESM namespace object rather than
+// the constructor, so `new jsSHA(...)` throws "jsSHA is not a constructor". Unwrapping
+// `.default` is a no-op under Node's CommonJS resolution, where it is absent.
+const jsSHA = (jsSHAModule as unknown as { default?: typeof jsSHAModule }).default ?? jsSHAModule;
 var Blake256 = require('./externals/blake256');
 var Blake2B = require('./externals/blake2b');
 var BigNum = require('browserify-bignum');

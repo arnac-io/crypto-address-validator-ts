@@ -6,5 +6,9 @@
   // src/crypto/externals/** is vendored third-party code that the validators reach through
   // `require()`. knip only resolves ESM imports, so it reports the whole directory as unused.
   // A few of its exports really are uncalled, but they are upstream surface and are left as-is.
-  "ignore": ["src/crypto/externals/**"]
+  "ignore": ["src/crypto/externals/**"],
+
+  // vite is invoked as a CLI by scripts/smoke-browser.js, inside the throwaway project it
+  // generates, so nothing in this repo imports it.
+  "ignoreDependencies": ["vite"]
 }
