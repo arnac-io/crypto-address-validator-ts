@@ -67,7 +67,9 @@ jobs:
           NAME: ${{ steps.check.outputs.name }}
           VERSION: ${{ steps.check.outputs.version }}
         run: |
-          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+          # --prefer-online revalidates rather than trusting cached metadata, so a stale hit
+          # cannot make us skip a release or attempt a duplicate one.
+          if npm view "$NAME@$VERSION" version --prefer-online >/dev/null 2>&1; then
             echo "$NAME@$VERSION is already published — nothing to release."
             echo "publish=false" >> "$GITHUB_OUTPUT"
           else
@@ -80,11 +82,12 @@ jobs:
 
       # `prepublishOnly` runs the whole gate (both test passes, publint, attw, the pack smoke
       # test) before anything is uploaded, so it is not repeated here.
-      - if: steps.decide.outputs.publish == 'true'
+      - id: publish
+        if: steps.decide.outputs.publish == 'true'
         run: npm publish
 
-      # Independent of the publish decision and idempotent, so a run that publishes but fails
-      # afterwards can be retried: it tags whatever is on the registry and has no tag yet.
+      # Idempotent, so a run that publishes but fails afterwards can be retried: it tags
+      # whatever is on the registry and has no tag yet.
       - name: Tag the commit and open a GitHub Release
         if: always() && steps.check.outputs.version != ''
         env:
@@ -92,11 +95,33 @@ jobs:
           NAME: ${{ steps.check.outputs.name }}
           VERSION: ${{ steps.check.outputs.version }}
           SHA: ${{ github.event.workflow_run.head_sha }}
+          # True when the version ought to be on the registry: we just published it, or it was
+          # already there. False only when `npm publish` itself failed.
+          EXPECTED: ${{ steps.publish.outcome == 'success' || steps.decide.outputs.publish == 'false' }}
         run: |
-          if ! npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
-            echo "$NAME@$VERSION is not on the registry — refusing to tag an unpublished version."
+          if [ "$EXPECTED" != 'true' ]; then
+            echo "npm publish did not succeed — refusing to tag an unpublished version."
             exit 0
           fi
+
+          # The registry is read-after-write eventually consistent: 0.6.0 was still reported
+          # missing 2s after a successful publish, which silently skipped tagging. Poll instead.
+          for attempt in $(seq 1 10); do
+            if npm view "$NAME@$VERSION" version --prefer-online >/dev/null 2>&1; then
+              published=yes
+              break
+            fi
+            echo "attempt $attempt: $NAME@$VERSION not visible on the registry yet; waiting 10s"
+            sleep 10
+          done
+
+          # Loud, not green: the publish succeeded, so failing to confirm it is a real problem.
+          # Re-running this workflow tags the release once the registry catches up.
+          if [ "${published:-}" != 'yes' ]; then
+            echo "::error::$NAME@$VERSION did not appear on the registry within 100s. It is published but untagged — re-run this workflow to tag it."
+            exit 1
+          fi
+
           if gh release view "v$VERSION" >/dev/null 2>&1; then
             echo "Release v$VERSION already exists."
             exit 0
