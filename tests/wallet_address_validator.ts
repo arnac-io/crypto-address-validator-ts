@@ -1046,6 +1046,10 @@ describe('validate', function () {
             invalid('4AWygwA3hHNE4e4Yr9PtRWJiorXTjZkCi57g4ExYzfXDFFQ8DRFEFyui1dLqVknpqQjGUBdTMbgaFAZaDbrVHdk3GAKBZ3E', 'monero', null);
             invalid('44643dtxcxjgMWEQLo6mh1c4d9Zxx9GbgK9hEj9iGSiFEryCkbwHyJ3JqxZJRqeC3Hb7ZBLKq5NkaJwR1x95EYnR1bTgN6d', 'xmr', null);
             invalid('A17N9ztrxjQD3v3JJtHGvHVnq6BAbujDNEuensB6PFwBYFpkjAicih8hDtX76HBuEag5NeaCuMZmRMe6eE5NMRGxFTQn8nJ', 'monero', { networkType: 'testnet' });
+            // 95 base58 characters, so it passes the alphabet check, but a block overflows on
+            // decode. cnBase58 signals that by throwing the bare string 'Overflow', which used
+            // to escape validate() instead of reading as an invalid address.
+            invalid('48jzMhc4qbNAQBaBrKmzY5cP1yqLwrCFhtwvNa2Nsm42gnwGoDh7v4Rn8oaTBdWSuLYsdWo2y1U1oNM7T2AVLc9k7CxE5FT', 'monero', null);
 
             //integrated
             invalid('4LNSCKNSTPNbJYkyAEgL966eHJHLDHiq1PpwKoiFBybcSqNGYfLBJApC62uQEeGAFxfYEd29uXBBrJFo7DhKqFVNi3GhmN79EtD5dgycYz', 'monero', null);

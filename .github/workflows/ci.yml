@@ -55,3 +55,8 @@ jobs:
 
       - name: Smoke-test the packed tarball
         run: npm run test:pack
+
+      # Every other check loads the package under Node's CommonJS resolution, which is how
+      # 0.6.0's browser-only crash reached the registry.
+      - name: Smoke-test a browser bundle
+        run: npm run test:browser
