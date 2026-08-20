@@ -1,0 +1,104 @@
+name: Release
+
+# Publishes whenever package.json's version is not yet on the registry, then tags that commit
+# and opens a GitHub Release. Runs only after CI has passed for the same commit on master, so
+# the four-Node matrix gates every publish.
+#
+# Uses npm trusted publishing (OIDC): no npm token is stored in this repository, and provenance
+# attestations are generated automatically.
+#
+# PREREQUISITES (one-time, cannot be scripted):
+#   1. Configure a Trusted Publisher for @fordefi/crypto-address-validator-ts on npmjs.com —
+#      provider GitHub Actions, this repository, workflow `release.yml`. Configurations created
+#      after 2026-05-20 must also select an allowed action; select `npm publish`.
+#   2. Add required reviewers to the `release` environment in repository settings, so an OIDC
+#      token is never minted without a second human.
+
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # Only for a green CI run of a push to master in this repository — never a pull request,
+    # never a fork.
+    if: >-
+      github.repository == 'arnac-io/crypto-address-validator-ts' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'master' &&
+      github.event.workflow_run.conclusion == 'success'
+    # GitHub-hosted only — trusted publishing does not support self-hosted runners
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write   # OIDC auth to npm
+      contents: write   # create the tag and the GitHub Release
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          # the commit CI validated, not whatever master points at now
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          # trusted publishing needs npm >= 11.5.1 and Node >= 22.14
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+
+      - name: Check whether this version is already on the registry
+        id: check
+        run: |
+          {
+            echo "name=$(node -p 'require("./package.json").name')"
+            echo "version=$(node -p 'require("./package.json").version')"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether to publish
+        id: decide
+        env:
+          NAME: ${{ steps.check.outputs.name }}
+          VERSION: ${{ steps.check.outputs.version }}
+        run: |
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "$NAME@$VERSION is already published — nothing to release."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$NAME@$VERSION is not on the registry — releasing."
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.decide.outputs.publish == 'true'
+        run: npm ci --ignore-scripts
+
+      # `prepublishOnly` runs the whole gate (both test passes, publint, attw, the pack smoke
+      # test) before anything is uploaded, so it is not repeated here.
+      - if: steps.decide.outputs.publish == 'true'
+        run: npm publish
+
+      # Independent of the publish decision and idempotent, so a run that publishes but fails
+      # afterwards can be retried: it tags whatever is on the registry and has no tag yet.
+      - name: Tag the commit and open a GitHub Release
+        if: always() && steps.check.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NAME: ${{ steps.check.outputs.name }}
+          VERSION: ${{ steps.check.outputs.version }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if ! npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "$NAME@$VERSION is not on the registry — refusing to tag an unpublished version."
+            exit 0
+          fi
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "Release v$VERSION already exists."
+            exit 0
+          fi
+          gh release create "v$VERSION" --target "$SHA" --generate-notes

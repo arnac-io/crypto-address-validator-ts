@@ -21,7 +21,7 @@
 var CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
 var GENERATOR = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
 
-export const encodings = {
+const encodings = {
     BECH32: "bech32",
     BECH32M: "bech32m",
 };
@@ -73,11 +73,11 @@ function createChecksum (hrp, data, enc) {
     return ret;
 }
 
-export function verifyChecksum (hrp, data, enc) {
+function verifyChecksum (hrp, data, enc) {
     return polymod(hrpExpand(hrp).concat(data)) === getEncodingConst(enc);
 }
 
-export function encode (hrp, data, enc) {
+function encode (hrp, data, enc) {
     var combined = data.concat(createChecksum(hrp, data, enc));
     var ret = hrp + '1';
     for (var p = 0; p < combined.length; ++p) {
@@ -86,7 +86,7 @@ export function encode (hrp, data, enc) {
     return ret;
 }
 
-export function decode (bechString, enc) {
+function decode (bechString, enc) {
     var p;
     var has_lower = false;
     var has_upper = false;
@@ -123,3 +123,10 @@ export function decode (bechString, enc) {
     }
     return {hrp: hrp, data: data.slice(0, data.length - 6)};
 }
+
+module.exports = {
+    encodings,
+    verifyChecksum,
+    encode,
+    decode,
+};

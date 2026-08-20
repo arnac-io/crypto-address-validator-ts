@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["tests/*.ts", "tests/helpers/*.ts", "scripts/*.js"],
+  "project": ["src/**/*.{ts,js}", "tests/**/*.ts", "scripts/*.js"],
+
+  // src/crypto/externals/** is vendored third-party code that the validators reach through
+  // `require()`. knip only resolves ESM imports, so it reports the whole directory as unused.
+  // A few of its exports really are uncalled, but they are upstream surface and are left as-is.
+  "ignore": ["src/crypto/externals/**"]
+}

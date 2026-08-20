@@ -1,15 +1,18 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "target": "esnext", 
-    "outDir": "dist",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "declarationMap": true,
     "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "lib": ["esnext", "dom"],
-    "allowJs": true,
-    "rootDir": "src"
+    "target": "es2023",
+    "outDir": "dist",
+    "rootDir": "src",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "isolatedModules": true,
+    "noUnusedLocals": true,
+    "lib": ["es2023"],
+    "allowJs": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "tests"]

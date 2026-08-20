@@ -23,7 +23,7 @@ const addressFormats = [
 ];
 
 
-export function isValidAddress(address: string, currency: Currency, opts: Options): boolean {
+export function isValidAddress(address: string, currency: Currency, opts: Options | null): boolean {
     return verifyChecksum(address)
 }
 

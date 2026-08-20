@@ -1,14 +1,15 @@
 import { describe } from 'mocha';
 import { expect } from 'chai';
-import { validate } from '../src/index';
+import type { Options } from './helpers/subject';
+import { validate } from './helpers/subject';
 
-function valid(address, currency, networkType) {
-    var valid = validate(address, currency, networkType);
+function valid(address: string, currency: string, opts: Options | null) {
+    var valid = validate(address, currency, opts);
     expect({ address, currency, valid }).to.deep.equal({ address, currency, valid: true });
 }
 
-function invalid(address, currency, networkType) {
-    var valid = validate(address, currency, networkType);
+function invalid(address: string, currency: string, opts: Options | null) {
+    var valid = validate(address, currency, opts);
     expect({ address, currency, valid }).to.deep.equal({ address, currency, valid: false });
 }
 
@@ -102,7 +103,7 @@ describe('validate', function () {
             // segwit addresses
             valid('ltc1qg42tkwuuxefutzxezdkdel39gfstuap288mfea', 'litecoin', null);
             valid('ltc1qg42tkwuuxefutzxezdkdel39gfstuap288mfea', 'litecoin', { networkType: 'prod' });
-            valid('tltc1qu78xur5xnq6fjy83amy0qcjfau8m367defyhms', 'litecoin', { networkType: { networkType: 'testnet' } });
+            valid('tltc1qu78xur5xnq6fjy83amy0qcjfau8m367defyhms', 'litecoin', { networkType: 'testnet' });
         });
 
         it('should return true for correct peercoin addresses', function () {
@@ -442,6 +443,10 @@ describe('validate', function () {
             invalid('0xF6f6ebAf5D78F4c93Baf856d3005B7395CCC272eT', 'usdt', null);
             invalid('3MbYQMMmSkC3AgWkj9FMo5LsPTW1zBTwXL', 'usdt', { chainType: 'erc20' });
             invalid('0x9ec7d40d627ec59981446a6e5acb33d51afcaf8a', 'tether', { chainType: 'omni' });
+            // DEV-26502: an options object without networkType must default to prod, not fall
+            // through to the prod+testnet union. mzBc4X... is version byte 6f (testnet).
+            invalid('mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef', 'usdt', { chainType: 'omni' });
+            invalid('mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef', 'usdt', {});
         });
 
         it('should return true for correct expanse addresses', function () {
@@ -650,6 +655,11 @@ describe('validate', function () {
 
             valid('69UwBV4LPg7hHUS5JXiXyfgVnESmDKe8KJppsLj8pRU', 'sol', null);
             valid('G4qGCGF4vWGPzYi2pxc2Djvgv3j8NiWaHQMgTVebCX6W', 'sol', null);
+
+            // 32-byte keys at both encoded lengths (DEV-26502: validated by decoded
+            // byte length, not character count)
+            valid('5AW6CJpkh8RqUL3H1HUd4CK1YY69t3SA4PwwLoGAnuW', 'sol', null);   // 43 chars
+            valid('JEKNVnkbo3jma5nREBBJCDoXFVeKkD56V3xKrvRmWxFG', 'sol', null);   // 44 chars
         });
 
         it('should return true for correct pearl mainnet addresses', function () {
@@ -714,19 +724,22 @@ describe('validate', function () {
     });
 
     describe('invalid results', function () {
-        function commonTests(currency) {
+        function commonTests(currency: string) {
             invalid('', currency, null); //reject blank
             invalid('%%@', currency, null); //reject invalid base58 string
             invalid('1A1zP1ePQGefi2DMPTifTL5SLmv7DivfNa', currency, null); //reject invalid address
             invalid('bd839e4f6fadb293ba580df5dea7814399989983', currency, null);  //reject transaction id's
             //testnet
-            invalid('', currency, 'testnet'); //reject blank
-            invalid('%%@', currency, 'testnet'); //reject invalid base58 string
+            invalid('', currency, { networkType: 'testnet' }); //reject blank
+            invalid('%%@', currency, { networkType: 'testnet' }); //reject invalid base58 string
             invalid('1A1zP1ePQGefi2DMPTifTL5SLmv7DivfNa', currency, { networkType: 'testnet' }); //reject invalid address
             invalid('bd839e4f6fadb293ba580df5dea7814399989983', currency, { networkType: 'testnet' });  //reject transaction id's
         }
 
         it('should return false for incorrect bitcoin addresses', function () {
+            // an empty or networkType-less options object must not widen to prod+testnet
+            invalid('mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef', 'btc', {});
+            invalid('mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef', 'btc', { chainType: 'erc20' });
             commonTests('bitcoin');
         });
 
@@ -986,6 +999,11 @@ describe('validate', function () {
             invalid('pzuefrpg3kl2ykqe52rxn96pd3kp4qudywr5py', 'bsv', null);
             invalid('rlt2c2wuxr644encp3as0hygtj9djrsaumku3cex5', 'bsv', null);
             invalid('qra607y4wnkmnpy3wcmrxmltzkrxywcq85c7watpdx09', 'bsv', null);
+            // cashaddr checksum must reject a single-character corruption of a valid address.
+            // Before DEV-26502 the checksum was computed with bech32's polynomial over
+            // RFC-4648 base32 and the result was inverted, so it contributed nothing.
+            invalid('bitcoincash:qq4v32mtagxac29my6gwj6fd4tmqg8rysu23dax808', 'bsv', null);
+            invalid('qq4v32mtagxac29my6gwj6fd4tmqg8rysu23dax808', 'bsv', null);
         });
 
         it('should return false for incorrect xtz(tezos) address', function () {
@@ -1008,6 +1026,13 @@ describe('validate', function () {
         });
 
         it('should return false for incorrect solana addresses', function () {
+            // DEV-26502: the decoded byte length decides validity, not the character count —
+            // the first vector below decodes to 31 bytes yet is 43 characters, the same length
+            // as a valid key.
+            invalid('4uQeVj5tqViQh7yWWGStvkEG1Zmhx6uasJtWCJziofL', 'sol', null);   // 31 bytes, 43 chars
+            invalid('2K3n5t4wSaF5mj27Tw9vStXWLWyRjjiH5Cp3CFLpKVCr1c', 'sol', null);   // 33 bytes
+            invalid('6ZRCB7AAqGre6c72PRz3MHLC73VMYvJ8bi9KHf1HFpN0', 'sol', null);   // '0' is not base58
+            invalid('6ZRCB7AAqGre6c72PRz3MHLC73VMYvJ8bi9KHf1HFpNkk', 'sol', null);  // one char too long
             invalid('833XQoXTx05iya53Tr6iqEs9GbRuvVfwyLCP2vpdzhq', 'solana', null);
             invalid('833XorXTTx5iya5B3Tr6iqEs9GbRuvVfwyLCP2vpdz', 'solana', null);
             invalid('1EM4e8eu2S2RQrbS8C6aYnunWpkAwQ8GtG', 'sol', null);
@@ -1026,302 +1051,38 @@ describe('validate', function () {
             invalid('4LNSCKNSTPNbJYkyAEgL966eHJHLDHiq1PpwKoiFBybcSqNGYfLBJApC62uQEeGAFxfYEd29uXBBrJFo7DhKqFVNi3GhmN79EtD5dgycYz', 'monero', null);
             invalid('4JpzTwf3i1GeCV76beVr19179oa8j1L8xNSC1bXMtAxxdf4aTTLqubL8EvXfQmUGKt9MMigFtKy91VtoTTSfg1LU7LocPruT6KcGC9RKJV', 'xmr', null);
         });
+
+        it('should return false for incorrect vet addresses', function () {
+            commonTests('vet');
+            invalid('SBGWKM3CD4IL47QN6X54N6Y33T3JDNVI6AIJ6CD5IM47HG3IG4O36XCU', 'vet', null);
+            invalid('Ox46B8aABa5Eaa84Dc074c350eD57D8b3c35B90E09', 'vet', null);
+            invalid('0x46b8aABa5Eaa84Dc074c350eD57D8b3c35B90E09', 'vet', null);
+        });
+
+        it('should return false for incorrect dot addresses', function () {
+            commonTests('dot');
+            invalid('1jQPKJmghHbrRhUiMt2cNEuxYbR6S9vYtJKqYvE4PNR9WDB', 'dot', null);
+            invalid('1FRMM8PEiWXYax7rpS6X4XZX1aAAxSWx1CrKTyrVYhV24fh', 'dot', null);
+            invalid('5CK8D1sKNwF473wbuBP6NuhQfPaWUetNsWUNAAzVwTfxqjf', 'dot', null);
+            invalid('pjsLDC1JFyrhm3ftC9Gs4QoyrkHKhZKtK7YqGTRFtTafgp', 'dot', null);
+            invalid('15FKUKXC6kwaXxJ1tNywmFy4ZY6FoDFCnU3fMbibFdeqwGw', 'dot', null);
+            invalid('CxDDSH8gS7jecsxaRL8Txf8H5kqesLXAEAEgp76Yz632J9M', 'dot', null);
+        });
+
+        it('should return false for incorrect injective addresses', function () {
+            commonTests('inj');
+
+            // bech32 specific
+            invalid('inj1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqe2hm4', 'inj', null); // wrong checksum/length
+            invalid('cosmos1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqnrql8a', 'inj', null); // wrong prefix
+            invalid('inj2qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqcqt4fz', 'inj', null); // wrong prefix variant
+            invalid('inj1', 'inj', null); // prefix only, no data
+
+            // EVM specific
+            invalid('0xinvalid', 'inj', null);
+            invalid('0xE37c0D48d68da5c5b14E5c1a9f1CFE802776D9F', 'inj', null); // too short (39 hex chars)
+            invalid('0xE37c0D48d68da5c5b14E5c1a9f1CFE802776D9FFF', 'inj', null); // too long (41 hex chars)
+        });
     });
 
 });
-
-describe('invalid results', function () {
-    function commonTests(currency) {
-        invalid('', currency, null); //reject blank
-        invalid('%%@', currency, null); //reject invalid base58 string
-        invalid('1A1zP1ePQGefi2DMPTifTL5SLmv7DivfNa', currency, null); //reject invalid address
-        invalid('bd839e4f6fadb293ba580df5dea7814399989983', currency, null);  //reject transaction id's
-        //testnet
-        invalid('', currency, { networkType: 'testnet' }); //reject blank
-        invalid('%%@', currency, { networkType: 'testnet' }); //reject invalid base58 string
-        invalid('1A1zP1ePQGefi2DMPTifTL5SLmv7DivfNa', currency, { networkType: 'testnet' }); //reject invalid address
-        invalid('bd839e4f6fadb293ba580df5dea7814399989983', currency, { networkType: 'testnet' });  //reject transaction id's
-    }
-
-    it('should return false for incorrect bitcoin addresses', function () {
-        commonTests('bitcoin');
-    });
-
-    it('should return false for incorrect bitcoincash addresses', function () {
-        commonTests('bitcoincash');
-    });
-
-    it('should return false for incorrect litecoin addresses', function () {
-        commonTests('litecoin');
-    });
-
-    it('should return false for incorrect peercoin addresses', function () {
-        commonTests('peercoin');
-    });
-
-    it('should return false for incorrect dogecoin addresses', function () {
-        commonTests('dogecoin');
-    });
-
-    it('should return false for incorrect beavercoin addresses', function () {
-        commonTests('beavercoin');
-    });
-
-    it('should return false for incorrect freicoin addresses', function () {
-        commonTests('freicoin');
-    });
-
-    it('should return false for incorrect protoshares addresses', function () {
-        commonTests('protoshares');
-    });
-
-    it('should return false for incorrect megacoin addresses', function () {
-        commonTests('megacoin');
-    });
-
-    it('should return false for incorrect primecoin addresses', function () {
-        commonTests('primecoin');
-    });
-
-    it('should return false for incorrect auroracoin addresses', function () {
-        commonTests('auroracoin');
-    });
-
-    it('should return false for incorrect namecoin addresses', function () {
-        commonTests('namecoin');
-    });
-
-    it('should return false for incorrect biocoin addresses', function () {
-        commonTests('biocoin');
-    });
-
-    it('should return false for incorrect garlicoin addresses', function () {
-        commonTests('garlicoin');
-    });
-
-    it('should return false for incorrect vertcoin addresses', function () {
-        commonTests('vertcoin');
-    });
-
-    it('should return false for incorrect bitcoingold addresses', function () {
-        commonTests('bitcoingold');
-    });
-
-    it('should return false for incorrect decred addresses', function () {
-        commonTests('decred');
-    });
-
-    it('should return false for incorrect monacoin addresses', function () {
-        commonTests('mona');
-    });
-
-    it('should return false for incorrect solarcoin addresses', function () {
-        commonTests('slr');
-    });
-
-    it('should return false for incorrect tether addresses', function () {
-        commonTests('usdt');
-    });
-
-    it('should return false for incorrect expanse addresses', function () {
-        commonTests('exp');
-    });
-
-    it('should return false for incorrect usdt addresses', function () {
-        commonTests('usdt');
-    });
-
-    it('should return false for incorrect bankex addresses', function () {
-        invalid('1SQHtwR5oJRKLfiWQ2APsAd9miUc4k2ez', 'bankex', null);
-        invalid('116CGDLddrZhMrTwhCVJXtXQpxygTT1kHd', 'BKX', null);
-        invalid('mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef', 'bankex', { networkType: 'testnet' });
-        invalid('mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef', 'BKX', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect digibyte addresses', function () {
-        commonTests('digibyte');
-    });
-
-    it('should return false for incorrect eip55 addresses', function () {
-        invalid('6xAff4d6793F584a473348EbA058deb8caad77a288', 'ethereum', null);
-        invalid('0x02fcd51aAbB814FfFe17908fbc888A8975D839A5', 'ethereum', null);
-        invalid('0XD1220A0CF47C7B9BE7A2E6BA89F429762E7B9ADB', 'ethereum', null);
-        invalid('aFf4d6793f584a473348ebA058deb8caad77a2885', 'ethereum', null);
-        invalid('0xff4d6793F584a473', 'ethereum', null);
-
-        invalid('0x02fcd51aAbB814FfFe17908fbc888A8975D839A5', 'ethereumclassic', null);
-        invalid('0x02fcd51aAbB814FfFe17908fbc888A8975D839A5', 'etherzero', null);
-        invalid('0x02fcd51aAbB814FfFe17908fbc888A8975D839A5', 'callisto', null);
-    });
-
-    it('should return false for incorrect dash addresses', function () {
-        commonTests('dash');
-    });
-
-    it('should return false for incorrect neo addresses', function () {
-        commonTests('neo');
-        invalid('AR4QmqYENiZAD6oXe7ftm6eDcwtHk7rVTa', 'neo', null);
-        invalid('AKDVzYGLczmykdtRaejgvWeZrvdkVEvQ10', 'NEO', null);
-    });
-
-    it('should return false for incorrect qtum addresses', function () {
-        commonTests('qtum');
-        invalid('QNPhBbVhDghASxcUh2vHotQUgNeLRFTcfb', 'qtum', null);
-        invalid('QOPhBbVhDghASxcUh2vHotQUgNeLRFTcfa', 'QTUM', null);
-    });
-
-    it('should return false for incorrect votecoin addresses', function () {
-        commonTests('votecoin');
-        invalid('t1Y9yhDa5XEjgfnTgZoKddeSiEN1aoLkQxq', 'votecoin', null);
-        invalid('t3Yz22vK5z2LcKEdg16Yv4FFneEL1zg9ojd', 'VOT', null);
-        invalid('t2YNzUUx8mWBCRYPRezvA363EYXyEpHokyi', 'votecoin', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect bitcoinz addresses', function () {
-        commonTests('bitcoinz');
-        invalid('t1Y9yhDa5XEjgfnTgZoKddeSiEN1aoLkQxq', 'bitcoinz', null);
-        invalid('t3Yz22vK5z2LcKEdg16Yv4FFneEL1zg9ojd', 'BTCZ', null);
-        invalid('t2YNzUUx8mWBCRYPRezvA363EYXyEpHokyi', 'bitcoinz', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect zclassic addresses', function () {
-        commonTests('zclassic');
-        invalid('t1Y9yhDa5XEjgfnTgZoKddeSiEN1aoLkQxq', 'zclassic', null);
-        invalid('t3Yz22vK5z2LcKEdg16Yv4FFneEL1zg9ojd', 'ZCL', null);
-        invalid('t2YNzUUx8mWBCRYPRezvA363EYXyEpHokyi', 'zclassic', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect hush addresses', function () {
-        invalid('t1Y9yhDa5XEjgfnTgZoKddeSiEN1aoLkQxq', 'hush', null);
-        invalid('t3Yz22vK5z2LcKEdg16Yv4FFneEL1zg9ojd', 'HUSH', null);
-        invalid('t2YNzUUx8mWBCRYPRezvA363EYXyEpHokyi', 'hush', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect zcash addresses', function () {
-        commonTests('zcash');
-        invalid('t1Y9yhDa5XEjgfnTgZoKddeSiEN1aoLkQxq', 'zcash', null);
-        invalid('t3Yz22vK5z2LcKEdg16Yv4FFneEL1zg9ojd', 'ZEC', null);
-        invalid('t2YNzUUx8mWBCRYPRezvA363EYXyEpHokyi', 'zcash', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect bitcoinprivate addresses', function () {
-        commonTests('bitcoinprivate');
-        invalid('b1Y4XXPFhwMb1SP33yhzn3h9qWXjujkgep4', 'bitcoinprivate', null);
-    });
-
-    it('should return false for incorrect snowgem addresses', function () {
-        commonTests('snowgem');
-        invalid('s1Yx7WBkjB4UH6qQjPp6Ysmtr1C1JiTK2Yw', 'snowgem', null);
-        invalid('s3Y27MhkBRt3ha2UuxhjXaYF4DCnttTMnL1', 'SNG', null);
-        invalid('t2YNzUUx8mWBCRYPRezvA363EYXyEpHokyi', 'snowgem', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect zencash addresses', function () {
-        commonTests('zencash');
-        invalid('znYiGGfYRepxkBjXYvA2kFrXiC351i9ta4z', 'zencash', null);
-        invalid('zsYEdGnZCQ9G86LZFtbynMn1hYTVhn6eYCL', 'ZEN', null);
-        invalid('ztYWMDLWjbruCJxKmmfAZiT6QAQdiv5F291', 'zencash', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect komodo addresses', function () {
-        commonTests('komodo');
-        invalid('R9Y5HirAzqDcWrWGiJEL115dpV3QB3hobH', 'komodo', null);
-        invalid('RAYj2KKVUohTu3hVdNJ4U6hQi7TNawpacH', 'KMD', null);
-        invalid('t2YNzUUx8mWBCRYPRezvA363EYXyEpHokyi', 'komodo', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect cardano addresses', function () {
-        commonTests('cardano');
-        invalid('Ae2tdPwUPEYxYNJw1He1esdZYvjmr4NtPzUsGTiqL9zd8ohjZYQcwu6lom7', 'cardano', null);
-        invalid('DdzFFzCqrhsfdzUZxvuBkhV8Lpm9p43p9ubh79GCTkxJikAjKh51qhtCFMqUniC5tv5ZExyvSmAte2Du2tGimavSo6qSgXbjiy8qZRTg1', 'cardano', null);
-        invalid('DdzFFzCqrhsfdzUZxvuBkhV8Lpm9p43p9ubh79GCTkxJikAjKh51qhtCFMqUniC5tv5ZExyvSmAte2Du2tGimavSo6qSgXbjiy8qZRT', 'ada', null);
-    });
-
-    it('should return false for incorrect waves addresses', function () {
-        commonTests('waves');
-        invalid('3P93mVrYnQ4ahaRMYwA2BeWY32eDxTpLVEs1', 'waves', null);
-        invalid('3P4eeU7v1LMHQFwwT2GW9W99c6vZyytHaj', 'waves', null);
-        invalid('2P93mVrYnQ4ahaRMYwA2BeWY32eDxTpLVEs', 'waves', null);
-
-        invalid('3Myrq5QDgRq3nBVRSSv9UYRP36xTtpJND5y', 'waves', { networkType: 'testnet' });
-        invalid('3My3KZgFQ3CrVHgz6vGRt8787sH4oAA1qp8', 'waves', { networkType: 'testnet' });
-    });
-
-    it('should return false for incorrect siacoin addresses', function () {
-        commonTests('siacoin')
-        invalid(
-            'ffe1308c044ade30392a0cdc1fd5a4dbe94f9616a95faf888ed36123d9e711557aa497530372',
-            'siacoin', null
-        )
-    })
-
-    it('should return false for incorrect lbry addresses', function () {
-        commonTests('lbc')
-        invalid('ffe1308c044ade30392a0cdc1fd5a4dbe94f9616a95faf888ed36123d9e711557aa497530372', 'lbc', null)
-    })
-
-    it('should return false for incorrect nem addresses', function () {
-        commonTests('nem');
-        invalid('xrb_1111111112111111111111111111111111111111111111111111hifc8npp', 'nem', null);
-        invalid('TNDzfERDpxLDS2w1q6yaFC7pzqaSQ3Bg31', 'nem', null);
-
-        invalid('3Myrq5QDgRq3nBVRSSv9UYRP36xTtpJND5y', 'nem', { networkType: 'testnet' });
-        invalid('3My3KZgFQ3CrVHgz6vGRt8787sH4oAA1qp8', 'nem', { networkType: 'testnet' });
-    });
-    //15823701926930889868L
-    it('should return false for incorrect lsk addresses', function () {
-        commonTests('lsk');
-        invalid('xrb_1111111112111111111111111111111111111111111111111111hifc8npp', 'lsk', null);
-        invalid('TNDzfERDpxLDS2w1q6yaFC7pzqaSQ3Bg31', 'lsk', null);
-
-        invalid('158237019269308898689L', 'lsk', null);
-        invalid('158237A192B930C898689L', 'lsk', null);
-    });
-
-    it('should return false for incorrect bsv addresses', function () {
-        commonTests('bsv');
-        invalid('xrb_1111111112111111111111111111111111111111111111111111hifc8npp', 'bsv', null);
-        invalid('TNDzfERDpxLDS2w1q6yaFC7pzqaSQ3Bg31', 'bsv', null);
-
-        invalid('158237019269308898689L', 'bsv', null);
-        invalid('158237A192B930C898689L', 'bsv', null);
-        invalid('bitcoin:qzpuefrpg3kl2ykQe52rxn96pd3Kp4qudywr5pyrsf', 'bsv', null);
-        invalid('pzuefrpg3kl2ykqe52rxn96pd3kp4qudywr5py', 'bsv', null);
-        invalid('rlt2c2wuxr644encp3as0hygtj9djrsaumku3cex5', 'bsv', null);
-        invalid('qra607y4wnkmnpy3wcmrxmltzkrxywcq85c7watpdx09', 'bsv', null);
-    });
-
-    it('should return false for incorrect vet addresses', function () {
-        commonTests('vet');
-        invalid('SBGWKM3CD4IL47QN6X54N6Y33T3JDNVI6AIJ6CD5IM47HG3IG4O36XCU', 'vet', null);
-        invalid('Ox46B8aABa5Eaa84Dc074c350eD57D8b3c35B90E09', 'vet', null);
-        invalid('0x46b8aABa5Eaa84Dc074c350eD57D8b3c35B90E09', 'vet', null);
-    });
-
-    it('should return false for incorrect dot addresses', function () {
-        commonTests('dot');
-        invalid('1jQPKJmghHbrRhUiMt2cNEuxYbR6S9vYtJKqYvE4PNR9WDB', 'dot', null);
-        invalid('1FRMM8PEiWXYax7rpS6X4XZX1aAAxSWx1CrKTyrVYhV24fh', 'dot', null);
-        invalid('5CK8D1sKNwF473wbuBP6NuhQfPaWUetNsWUNAAzVwTfxqjf', 'dot', null);
-        invalid('pjsLDC1JFyrhm3ftC9Gs4QoyrkHKhZKtK7YqGTRFtTafgp', 'dot', null);
-        invalid('15FKUKXC6kwaXxJ1tNywmFy4ZY6FoDFCnU3fMbibFdeqwGw', 'dot', null);
-        invalid('CxDDSH8gS7jecsxaRL8Txf8H5kqesLXAEAEgp76Yz632J9M', 'dot', null);
-    });
-
-    it('should return false for incorrect injective addresses', function () {
-        commonTests('inj');
-
-        // bech32 specific
-        invalid('inj1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqe2hm4', 'inj', null); // wrong checksum/length
-        invalid('cosmos1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqnrql8a', 'inj', null); // wrong prefix
-        invalid('inj2qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqcqt4fz', 'inj', null); // wrong prefix variant
-        invalid('inj1', 'inj', null); // prefix only, no data
-
-        // EVM specific
-        invalid('0xinvalid', 'inj', null);
-        invalid('0xE37c0D48d68da5c5b14E5c1a9f1CFE802776D9F', 'inj', null); // too short (39 hex chars)
-        invalid('0xE37c0D48d68da5c5b14E5c1a9f1CFE802776D9FFF', 'inj', null); // too long (41 hex chars)
-    });
-});
-
-

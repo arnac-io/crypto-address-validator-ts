@@ -13,7 +13,6 @@ import * as XTZValidator from './validators/tezos_validator';
 import * as USDTValidator from './validators/usdt_validator';
 import * as DotValidator from './validators/dot_validator';
 import * as BIP173Validator from './validators/bip173_validator';
-import * as IOTAValidator from './validators/iota_validator';
 import * as XMRValidator from './validators/xmr_validator';
 import * as SOLValidator from './validators/sol_validator';
 import * as PearlValidator from './validators/pearl_validator';
@@ -944,7 +943,7 @@ const CURRENCIES: Currency[] = [{
         name: 'IOTA',
         symbol: 'miota',
         bech32Hrp: { prod: ['iota'], testnet: ['iota']},
-        validator: IOTAValidator.isValidAddress,
+        validator: BIP173Validator.isValidAddress,
     },
     {
         name: 'Pearl',
@@ -961,7 +960,8 @@ export function getByNameOrSymbol(currencyNameOrSymbol: string) {
     });
 }
 export function getAll() {
-    return CURRENCIES;
+    // a copy: callers must not be able to reorder or mutate the shared table
+    return CURRENCIES.slice();
 }
 
 ////spit out details for readme.md
@@ -975,4 +975,3 @@ export function getAll() {
 //     .forEach(c => console.log(`"${c.name}","${c.symbol}",`));
 //
 
-export default { getByNameOrSymbol, getAll };

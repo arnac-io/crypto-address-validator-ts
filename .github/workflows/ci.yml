@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # 20.19 is the declared engines floor (the version where require(esm) landed); 22 is
+        # where Node's module-syntax detection surfaced DEV-26502 and is the floor most
+        # consumers run; 24 is Active LTS; 26 is Current.
+        node-version: ['20.19', '22.x', '24.x', '26.x']
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      # --ignore-scripts skips the `prepare` build; the explicit build step below covers it
+      - run: npm ci --ignore-scripts
+
+      - run: npm run build
+
+      - name: Test against src
+        run: npm run test:src
+
+      - name: Test against the built dist
+        run: npm run test:dist
+
+      - name: Validate package metadata and type resolution
+        run: npm run lint:pkg
+
+      - name: Check for dead code
+        run: npm run lint:dead
+
+      - name: Check the README currency list against the code
+        run: npm run lint:docs
+
+      - name: Smoke-test the packed tarball
+        run: npm run test:pack

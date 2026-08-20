@@ -118,7 +118,7 @@ function uint64_to_8be(num, size) {
     return res;
 }
 
-export function encode_block (data, buf, index) {
+function encode_block (data, buf, index) {
     if (data.length < 1 || data.length > full_encoded_block_size) {
         throw "Invalid block length: " + data.length;
     }
@@ -137,7 +137,7 @@ export function encode_block (data, buf, index) {
     return buf;
 };
 
-export function encode (hex) {
+function encode (hex) {
     var data = hextobin(hex);
     if (data.length === 0) {
         return "";
@@ -160,7 +160,7 @@ export function encode (hex) {
     return bintostr(res);
 };
 
-export function decode_block (data, buf, index) {
+function decode_block (data, buf, index) {
     if (data.length < 1 || data.length > full_encoded_block_size) {
         throw "Invalid block length: " + data.length;
     }
@@ -191,7 +191,7 @@ export function decode_block (data, buf, index) {
     return buf;
 };
 
-export function decode (enc) {
+function decode (enc) {
     enc = strtobin(enc);
     if (enc.length === 0) {
         return "";
@@ -211,4 +211,11 @@ export function decode (enc) {
         data = decode_block(enc.subarray(full_block_count * full_encoded_block_size, full_block_count * full_encoded_block_size + last_block_size), data, full_block_count * full_block_size);
     }
     return bintohex(data);
+};
+
+module.exports = {
+    encode_block,
+    encode,
+    decode_block,
+    decode,
 };

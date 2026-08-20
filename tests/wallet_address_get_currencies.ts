@@ -1,6 +1,13 @@
 import { describe } from 'mocha';
 import { expect } from 'chai';
-import { getCurrencies, findCurrency, validate } from '../src/index';
+import { entry, getCurrencies, findCurrency, target, validate } from './helpers/subject';
+
+describe('test harness', function () {
+    it('runs against the artifact named by TEST_TARGET', function () {
+        expect(target).to.be.oneOf(['src', 'dist']);
+        expect(entry).to.contain(target);
+    });
+});
 
 describe('getCurrencies()', function () {
     it('Should get all currencies', function () {
@@ -16,10 +23,7 @@ describe('getCurrencies()', function () {
 
     it('Should throw exception in case of unknown currency', function() {
         const wrongCurrency = '%%%1312312';
-        try {
-            validate('123', wrongCurrency, null);
-        } catch(e) {
-            expect(e.message).to.equal('Missing validator for currency: ' + wrongCurrency);
-        }
+        expect(() => validate('123', wrongCurrency, null))
+            .to.throw('Missing validator for currency: ' + wrongCurrency);
     })
 });

@@ -95,7 +95,7 @@ function isValidAddress(address, currency, opts = {}) {
         return false;
     }
 
-    const networkType = opts ? opts.networkType : DEFAULT_NETWORK_TYPE;
+    const networkType = opts?.networkType ?? DEFAULT_NETWORK_TYPE;
 
     var correctBech32Hrps;
     if (networkType === 'prod' || networkType === 'testnet') {

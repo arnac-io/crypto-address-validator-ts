@@ -55,19 +55,21 @@ function getAddressType(address: string, currency: Currency): any {
     return null;
 }
 
-function isValidP2PKHandP2SHAddress(address: string, currency: Currency, opts: Options): boolean {
-    const networkType = opts ? opts.networkType : DEFAULT_NETWORK_TYPE;
+function isValidP2PKHandP2SHAddress(address: string, currency: Currency, opts: Options | null): boolean {
+    const networkType = opts?.networkType ?? DEFAULT_NETWORK_TYPE;
+
+    if (!currency.addressTypes) {
+        return false;
+    }
 
     let correctAddressTypes: string[];
     const addressType = getAddressType(address, currency);
 
     if (addressType) {
         if (networkType === 'prod' || networkType === 'testnet') {
-            correctAddressTypes = currency.addressTypes![networkType];
-        } else if (currency.addressTypes) {
-            correctAddressTypes = currency.addressTypes.prod.concat(currency.addressTypes.testnet);
+            correctAddressTypes = currency.addressTypes[networkType];
         } else {
-            return false;
+            correctAddressTypes = currency.addressTypes.prod.concat(currency.addressTypes.testnet);
         }
 
         return correctAddressTypes.indexOf(addressType) >= 0;
@@ -76,7 +78,7 @@ function isValidP2PKHandP2SHAddress(address: string, currency: Currency, opts: O
     return false;
 }
 
-export function isValidAddress(address: string, currency: Currency, opts: Options): boolean {
+export function isValidAddress(address: string, currency: Currency, opts: Options | null): boolean {
     return isValidP2PKHandP2SHAddress(address, currency, opts) || segwit.isValidAddress(address, currency, opts);
 }
 

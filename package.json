@@ -1,9 +1,9 @@
 {
-    "name": "@fordefi-public/crypto-address-validator-ts",
-    "version": "0.5.25",
-    "description": "Crypto address validator for Bitcoin and other Altcoins, forked to be used with typescript",
+    "name": "@fordefi/crypto-address-validator-ts",
+    "version": "0.6.0",
+    "description": "Fordefi's TypeScript crypto address validator for Bitcoin and other altcoins. Fork of crypto-address-validator-ts.",
     "keywords": [
-        "typesript",
+        "typescript",
         "angular",
         "0x",
         "zrx",
@@ -137,8 +137,6 @@
         "dai",
         "NameCoin",
         "nmc",
-        "Nano",
-        "nano",
         "Nem",
         "xem",
         "Neo",
@@ -173,14 +171,8 @@
         "qnt",
         "Quantum Resistant Ledger",
         "qrl",
-        "RaiBlocks",
-        "xrb",
         "Ripio Credit Network",
         "rcn",
-        "Ripple",
-        "xrp",
-        "Baby Ripple",
-        "babyxrp",
         "Salt",
         "salt",
         "Serve",
@@ -199,8 +191,6 @@
         "spnd",
         "Status",
         "snt",
-        "Stellar",
-        "xlm",
         "Storj",
         "storj",
         "Storm",
@@ -402,44 +392,72 @@
         "Pearl",
         "pearl"
     ],
-    "author": "Mark <mark.suurland@gmail.com>, Rony <rony@arnac.io>",
-    "homepage": "https://github.com/marksuurland/crypto-address-validator-ts",
+    "author": "Fordefi <support@fordefi.com>",
+    "contributors": [
+        "Mark Suurland <mark.suurland@gmail.com>",
+        "Rony <rony@arnac.io>"
+    ],
+    "homepage": "https://github.com/arnac-io/crypto-address-validator-ts#readme",
+    "bugs": {
+        "url": "https://github.com/arnac-io/crypto-address-validator-ts/issues"
+    },
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/marksuurland/crypto-address-validator-ts.git"
+        "url": "git+https://github.com/arnac-io/crypto-address-validator-ts.git"
     },
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "type": "commonjs",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "dist",
+        "src",
+        "CHANGELOG.md"
+    ],
+    "sideEffects": false,
+    "engines": {
+        "node": ">=20.19.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
+        "build": "tsc",
+        "test": "npm run test:src && npm run test:dist",
+        "test:src": "mocha -r ts-node/register 'tests/*.ts'",
+        "test:dist": "npm run build && env TEST_TARGET=dist mocha -r ts-node/register 'tests/*.ts'",
+        "lint:pkg": "publint && attw --pack .",
+        "lint:dead": "knip",
+        "lint:docs": "npm run build && node scripts/check-readme-currencies.js",
+        "test:pack": "npm run build && node scripts/smoke-pack.js",
         "prepare": "npm run build",
-        "build": "npm test && tsc",
-        "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'"
+        "prepublishOnly": "npm run test && npm run lint:pkg && npm run test:pack"
     },
     "dependencies": {
-        "@solana/web3.js": "^1.98.2",
-        "base-x": "^3.0.9",
         "browserify-bignum": "^1.3.0-2",
+        "buffer": "^6.0.3",
         "cbor-js": "^0.1.0",
-        "crc": "^3.8.0",
-        "js-sha3": "^0.8.0",
-        "js-sha512": "^0.8.0",
-        "jssha": "^2.4.2",
-        "lodash.isequal": "^4.5.0"
+        "crc": "^4.3.2",
+        "js-sha3": "^0.12.0",
+        "jssha": "^3.3.2"
     },
     "devDependencies": {
-        "@types/chai": "^4.3.0",
-        "@types/mocha": "^9.0.0",
-        "@types/node": "^18.0.0",
-        "buffer": "^6.0.3",
-        "chai": "^4.3.4",
-        "mocha": "^11.5.0",
-        "ts-node": "^10.4.0",
-        "typescript": "^4.5.4"
-    },
-    "standard": {
-        "ignore": [
-            "dist/"
-        ]
+        "@arethetypeswrong/cli": "^0.18.2",
+        "@types/chai": "^5.2.3",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "^20.19.9",
+        "chai": "^6.2.2",
+        "knip": "^5.64.4",
+        "mocha": "^11.7.6",
+        "publint": "^0.3.14",
+        "ts-node": "^10.9.2",
+        "typescript": "^6.0.3"
     }
 }
